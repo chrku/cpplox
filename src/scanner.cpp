@@ -169,6 +169,24 @@ void Scanner::scanToken() {
             if (match('/')) {
                 // A comment goes until the end of the line.
                 while (peek() != '\n' && !isAtEnd()) advance();
+            } else if (match('*')) { // Multi-line comments
+                int num_comments_opened = 1;
+                bool comment_done = false;
+                while (!comment_done && !isAtEnd()) {
+                    if (match('*') && match('/')) {
+                        num_comments_opened -= 1;
+                    } else if (match('/') && match('*')) {
+                        num_comments_opened += 1;
+                    }
+
+                    if (!isAtEnd()) { advance(); }
+
+                    if (num_comments_opened <= 0) { comment_done = true; }
+                }
+
+                if (isAtEnd() && num_comments_opened > 0) {
+                    interpreter_->error(line_, "Multi-line comment not closed");
+                }
             } else {
                 addToken(TokenType::SLASH);
             }
