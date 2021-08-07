@@ -5,6 +5,8 @@
 #ifndef LOX_TOKEN_TYPE_H
 #define LOX_TOKEN_TYPE_H
 
+#include <iostream>
+
 /*!
  * Enumeration representing different types of tokens in lox
  */
@@ -26,8 +28,9 @@ enum class TokenType {
     AND, CLASS, ELSE, FALSE, FUN, FOR, IF, NIL, OR,
     PRINT, RETURN, SUPER, THIS, TRUE, VAR, WHILE,
 
-    EOF
+    EOF_TYPE
 };
 
+std::ostream& operator<<(std::ostream& os, TokenType t);
 
 #endif //LOX_TOKEN_TYPE_H

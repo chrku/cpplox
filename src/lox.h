@@ -10,12 +10,12 @@
 #ifndef LOX_LOX_H
 #define LOX_LOX_H
 
-#include <string_view>
+#include <memory>
 
 /*!
  * Class representing the context of the lox interpreter
  */
-class LoxInterpreter {
+class LoxInterpreter : public std::enable_shared_from_this<LoxInterpreter> {
 public:
     /*!
      * Run file containing lox commands
@@ -33,7 +33,7 @@ public:
      * does the requisite steps and then runs it
      * @param source fragment of source code to run
      */
-    void run(std::string_view source);
+    void run(std::unique_ptr<std::string> source);
 
     /*!
      * Report an error in a certain line

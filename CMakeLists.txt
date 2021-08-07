@@ -6,4 +6,6 @@ set(CMAKE_CXX_STANDARD 20)
 add_executable(lox
                src/main.cpp
                src/lox.cpp
-               src/string_utils.cpp)
+               src/token.cpp
+               src/scanner.cpp
+               src/token_type.cpp)
