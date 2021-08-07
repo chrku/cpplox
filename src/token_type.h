@@ -31,6 +31,12 @@ enum class TokenType {
     EOF_TYPE
 };
 
+/*!
+ * Print token type to output stream
+ * @param os output stream to use
+ * @param t token enumeration object to print
+ * @return output stream handle
+ */
 std::ostream& operator<<(std::ostream& os, TokenType t);
 
 #endif //LOX_TOKEN_TYPE_H
