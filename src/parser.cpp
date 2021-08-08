@@ -109,7 +109,7 @@ std::unique_ptr<Expression> Parser::primary() {
 
 
 bool Parser::match(std::initializer_list<TokenType> types) {
-    if (std::any_of(types.begin(), types.end(), [&](TokenType t) { check(t); })) {
+    if (std::any_of(types.begin(), types.end(), [&](TokenType t) { return check(t); })) {
         advance();
         return true;
     }

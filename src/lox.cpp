@@ -5,6 +5,7 @@
 #include "lox.h"
 #include "scanner.h"
 #include "parser.h"
+#include "astprinter.h"
 
 #include <fstream>
 #include <string>
@@ -46,6 +47,8 @@ void LoxInterpreter::run(std::unique_ptr<std::string> source) {
     auto expr = parser.parse();
 
     if (hadError_) return;
+    AstPrinter printer;
+    std::cout << printer.print(*expr) << std::endl;
 }
 
 void LoxInterpreter::error(int line, std::string_view message) {
