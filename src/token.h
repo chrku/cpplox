@@ -43,11 +43,16 @@ public:
      * @param value string value of token
      */
     Token(TokenType type, std::string_view lexeme, int line, std::string_view value);
+
+    [[nodiscard]] TokenType getType() const;
+    [[nodiscard]] const std::variant<std::monostate, double, std::string>& getLiteral() const;
+    [[nodiscard]] const std::string& getLexeme() const;
+    [[nodiscard]] int getLine() const;
 private:
     const TokenType type_;
     const std::string lexeme_;
     const int line_;
-    std::variant<std::monostate, double, std::string> literal_;
+    const std::variant<std::monostate, double, std::string> literal_;
 
     friend std::ostream& operator<<(std::ostream& os, const Token& t);
 };

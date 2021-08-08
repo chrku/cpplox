@@ -30,3 +30,19 @@ std::ostream &operator<<(std::ostream &os, const Token &t) {
 
     return os;
 }
+
+TokenType Token::getType() const {
+    return type_;
+}
+
+const std::variant<std::monostate, double, std::string> &Token::getLiteral() const {
+    return literal_;
+}
+
+const std::string& Token::getLexeme() const {
+    return lexeme_;
+}
+
+int Token::getLine() const {
+    return line_;
+}

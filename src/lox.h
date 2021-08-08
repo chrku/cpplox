@@ -10,6 +10,8 @@
 #ifndef LOX_LOX_H
 #define LOX_LOX_H
 
+#include "token.h"
+
 #include <memory>
 
 /*!
@@ -41,9 +43,10 @@ public:
      * @param message error message
      */
     void error(int line, std::string_view message);
+
+    void error(const Token& token, std::string_view message);
 private:
     bool hadError_ = false;
-
     void reportError(int line, std::string_view where, std::string_view message);
 };
 

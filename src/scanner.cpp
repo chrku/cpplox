@@ -24,9 +24,10 @@ const std::map<std::string, TokenType> Scanner::keywords_ = {
 };
 
 Scanner::Scanner(std::unique_ptr<std::string> source, std::shared_ptr<LoxInterpreter> loxInterpreter)
-    : source_{std::move(source)}, interpreter_{std::move(loxInterpreter)} {}
+    : source_{std::move(source)}, interpreter_{std::move(loxInterpreter)},
+      tokens_(std::make_shared<std::vector<Token>>()) {}
 
-const std::vector<Token> &Scanner::getTokens() const {
+std::shared_ptr<std::vector<Token>> Scanner::getTokens() const {
     return tokens_;
 }
 
@@ -125,17 +126,17 @@ bool Scanner::isAlphaNumeric(char c) {
 
 void Scanner::addToken(TokenType type) {
     auto lexeme = source_->substr(start_, current_ - start_);
-    tokens_.emplace_back(type, lexeme, line_);
+    tokens_->emplace_back(type, lexeme, line_);
 }
 
 void Scanner::addToken(std::string_view literal) {
     auto lexeme = source_->substr(start_, current_ - start_);
-    tokens_.emplace_back(TokenType::STRING, lexeme, line_, literal);
+    tokens_->emplace_back(TokenType::STRING, lexeme, line_, literal);
 }
 
 void Scanner::addToken(double literal) {
     auto lexeme = source_->substr(start_, current_ - start_);
-    tokens_.emplace_back(TokenType::NUMBER, lexeme, line_, literal);
+    tokens_->emplace_back(TokenType::NUMBER, lexeme, line_, literal);
 }
 
 void Scanner::scanToken() {

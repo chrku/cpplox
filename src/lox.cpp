@@ -4,6 +4,7 @@
 
 #include "lox.h"
 #include "scanner.h"
+#include "parser.h"
 
 #include <fstream>
 #include <string>
@@ -41,10 +42,10 @@ void LoxInterpreter::run(std::unique_ptr<std::string> source) {
     Scanner scanner{std::move(source), shared_from_this()};
     scanner.scanTokens();
     auto tokens = scanner.getTokens();
+    Parser parser{tokens, shared_from_this()};
+    auto expr = parser.parse();
 
-    for (const auto& token : tokens) {
-        std::cout << token << std::endl;
-    }
+    if (hadError_) return;
 }
 
 void LoxInterpreter::error(int line, std::string_view message) {
@@ -54,4 +55,12 @@ void LoxInterpreter::error(int line, std::string_view message) {
 void LoxInterpreter::reportError(int line, std::string_view where, std::string_view message) {
     std::cout << "[line " << line << "] Error" << where << ": " << message << std::endl;
     hadError_ = true;
+}
+
+void LoxInterpreter::error(const Token& token, std::string_view message) {
+    if (token.getType() == TokenType::EOF_TYPE) {
+        reportError(token.getLine(), " at end", message);
+    } else {
+        reportError(token.getLine(), "at '" + token.getLexeme() + "'", message);
+    }
 }

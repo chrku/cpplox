@@ -30,7 +30,7 @@ public:
      * Return any tokens after scanning
      * @return tokens
      */
-    [[nodiscard]] const std::vector<Token>& getTokens() const;
+    [[nodiscard]] std::shared_ptr<std::vector<Token>> getTokens() const;
 
     /*!
      * Scan tokens in source
@@ -41,7 +41,7 @@ private:
     std::shared_ptr<LoxInterpreter> interpreter_;
     std::unique_ptr<std::string> source_;
 
-    std::vector<Token> tokens_;
+    std::shared_ptr<std::vector<Token>> tokens_;
 
     // Information about where we are in the code
     int start_ = 0;
