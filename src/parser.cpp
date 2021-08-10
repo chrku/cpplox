@@ -20,7 +20,18 @@ std::unique_ptr<Expression> Parser::parse() {
 }
 
 std::unique_ptr<Expression> Parser::expression() {
-    return equality();
+    return comma();
+}
+
+std::unique_ptr<Expression> Parser::comma() {
+    auto left = equality();
+    while (match({TokenType::COMMA})) {
+        auto op = previous();
+        auto right = equality();
+        left = std::make_unique<Binary>(std::move(left), op, std::move(right));
+    }
+
+    return left;
 }
 
 std::unique_ptr<Expression> Parser::equality() {
@@ -171,3 +182,4 @@ void Parser::synchronize() {
         advance();
     }
 }
+

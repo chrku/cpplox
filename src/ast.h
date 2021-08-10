@@ -10,6 +10,9 @@
 #include <memory>
 #include <utility>
 
+/*!
+ * Represents null values
+ */
 class NullType {};
 
 class Binary;
@@ -18,6 +21,9 @@ class Literal;
 class Unary;
 class Expression;
 
+/*!
+ * AST visitor interface
+ */
 class ExpressionVisitor {
 public:
     virtual void visitBinary(Binary& b) = 0;
@@ -26,12 +32,18 @@ public:
     virtual void visitUnary(Unary& u) = 0;
 };
 
+/*!
+ * Abstract base class for expressions
+ */
 class Expression {
 public:
     virtual ~Expression() = default;
     virtual void accept (ExpressionVisitor& visitor) = 0;
 };
 
+/*!
+ * Expressions with arity two
+ */
 class Binary : public Expression {
 public:
     Binary(std::unique_ptr<Expression> left, Token  op, std::unique_ptr <Expression> right)
@@ -61,6 +73,9 @@ private:
     std::unique_ptr<Expression> right_;
 };
 
+/*!
+ * Expressions in parentheses
+ */
 class Grouping : public Expression {
 public:
     explicit Grouping(std::unique_ptr<Expression> expression) : expression_(std::move(expression)) {}
@@ -78,6 +93,9 @@ private:
     std::unique_ptr<Expression> expression_;
 };
 
+/*!
+ * Literal expressions
+ */
 class Literal : public Expression {
 public:
     explicit Literal() : value_(NullType{}) {}
@@ -98,6 +116,9 @@ private:
     std::variant<double, std::string, bool, NullType> value_;
 };
 
+/*!
+ * Unary expressions
+ */
 class Unary : public Expression {
 public:
     Unary(Token  op, std::unique_ptr<Expression> right) : operator_(std::move(op)), right_(std::move(right)) {}
