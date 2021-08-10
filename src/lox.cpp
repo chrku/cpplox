@@ -5,7 +5,9 @@
 #include "lox.h"
 #include "scanner.h"
 #include "parser.h"
+#include "interpreter.h"
 #include "astprinter.h"
+#include "utils.h"
 
 #include <fstream>
 #include <string>
@@ -23,7 +25,10 @@ void LoxInterpreter::runFile(const char *filename) {
     run(std::move(source));
 
     if (hadError_) {
-        throw std::runtime_error{"Error during scanning of program"};
+        std::exit(65);
+    }
+    if (hadRuntimeError_) {
+        std::exit(70);
     }
 }
 
@@ -47,8 +52,12 @@ void LoxInterpreter::run(std::unique_ptr<std::string> source) {
     auto expr = parser.parse();
 
     if (hadError_) return;
-    AstPrinter printer;
-    std::cout << printer.print(*expr) << std::endl;
+    try {
+        LoxType result = interpreter_.evaluate(*expr);
+        std::cout << stringify(result) << std::endl;
+    } catch (const RuntimeError& error) {
+        runtimeError(error);
+    }
 }
 
 void LoxInterpreter::error(int line, std::string_view message) {
@@ -66,4 +75,30 @@ void LoxInterpreter::error(const Token& token, std::string_view message) {
     } else {
         reportError(token.getLine(), "at '" + token.getLexeme() + "'", message);
     }
+}
+
+std::string LoxInterpreter::stringify(const LoxType &l) {
+    std::string return_value;
+
+    std::visit(overload{
+            [&](double d) {
+                return_value = std::to_string(d);
+            },
+            [&](const std::string& s) {
+                return_value = s;
+            },
+            [&](const NullType& n) {
+                return_value = "nil";
+            },
+            [&](bool b) {
+                return_value = std::to_string(b);
+            }
+    }, l);
+
+    return return_value;
+}
+
+void LoxInterpreter::runtimeError(const RuntimeError& e) {
+    std::cout << e.what() << "\nline " << e.getToken().getLine() << "]\n";
+    hadRuntimeError_ = true;
 }

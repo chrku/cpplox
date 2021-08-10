@@ -35,6 +35,11 @@ public:
 };
 
 /*!
+ * Representation of the types a Lox expression can return
+ */
+using LoxType = std::variant<double, std::string, bool, NullType>;
+
+/*!
  * Abstract base class for expressions
  */
 class Expression {
@@ -143,11 +148,11 @@ public:
         return visitor.visitLiteral(*this);
     }
 
-    [[nodiscard]] const std::variant<double, std::string, bool, NullType>& getValue() const {
+    [[nodiscard]] const LoxType& getValue() const {
         return value_;
     }
 private:
-    std::variant<double, std::string, bool, NullType> value_;
+    LoxType value_;
 };
 
 /*!

@@ -13,14 +13,13 @@
 class AstPrinter : public ExpressionVisitor {
 public:
     std::string print(Expression& expr);
-
+private:
     void visitBinary(Binary& b) override;
     void visitTernary(Ternary& t) override;
     void visitGrouping(Grouping& g) override;
     void visitLiteral(Literal& l) override;
     void visitUnary(Unary& u) override;
 
-private:
     std::stringstream stream_{};
 };
 
