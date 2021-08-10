@@ -17,6 +17,16 @@ void AstPrinter::visitBinary(Binary& b) {
     stream_ << ")";
 }
 
+void AstPrinter::visitTernary(Ternary& t) {
+    stream_ << "(";
+    t.getLeft()->accept(*this);
+    stream_ << "?";
+    t.getMiddle()->accept(*this);
+    stream_ << ":";
+    t.getRight()->accept(*this);
+    stream_ << ")";
+}
+
 void AstPrinter::visitGrouping(Grouping &g) {
     stream_ << "(";
     g.getExpression()->accept(*this);
@@ -29,7 +39,7 @@ void AstPrinter::visitLiteral(Literal &l) {
             [&](double d) { stream_ << d; },
             [&](const std::string& s) { stream_ << s; },
             [&](const NullType& n) { stream_ << "nil"; },
-            [&](bool b) {stream_ << b ? "true" : "false";}
+            [&](bool b) {stream_ << (b ? "true" : "false");}
     }, l.getValue());
 }
 

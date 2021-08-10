@@ -123,6 +123,12 @@ std::ostream& operator<<(std::ostream& os, TokenType t) {
         case TokenType::EOF_TYPE:
             os << "EOF_TYPE";
             break;
+        case TokenType::QUESTION_MARK:
+            os << "QUESTION_MARK";
+            break;
+        case TokenType::COLON:
+            os << "COLON";
+            break;
     }
 
     return os;

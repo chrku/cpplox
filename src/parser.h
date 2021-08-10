@@ -47,6 +47,7 @@ private:
     std::unique_ptr<Expression> expression();
     std::unique_ptr<Expression> comma();
     std::unique_ptr<Expression> equality();
+    std::unique_ptr<Expression> ternary();
     std::unique_ptr<Expression> comparison();
     std::unique_ptr<Expression> term();
     std::unique_ptr<Expression> factor();

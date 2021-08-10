@@ -16,6 +16,7 @@
 class NullType {};
 
 class Binary;
+class Ternary;
 class Grouping;
 class Literal;
 class Unary;
@@ -27,6 +28,7 @@ class Expression;
 class ExpressionVisitor {
 public:
     virtual void visitBinary(Binary& b) = 0;
+    virtual void visitTernary(Ternary& t) = 0;
     virtual void visitGrouping(Grouping& g) = 0;
     virtual void visitLiteral(Literal& l) = 0;
     virtual void visitUnary(Unary& u) = 0;
@@ -46,7 +48,7 @@ public:
  */
 class Binary : public Expression {
 public:
-    Binary(std::unique_ptr<Expression> left, Token  op, std::unique_ptr <Expression> right)
+    Binary(std::unique_ptr<Expression> left, Token  op, std::unique_ptr<Expression> right)
             : left_(std::move(left)), operator_(std::move(op)), right_(std::move(right)) {}
 
     ~Binary() override = default;
@@ -70,6 +72,38 @@ public:
 private:
     std::unique_ptr<Expression> left_;
     Token operator_;
+    std::unique_ptr<Expression> right_;
+};
+
+/*!
+ * Represents ternary conditional operator
+ */
+class Ternary : public Expression {
+public:
+    Ternary(std::unique_ptr<Expression> left, std::unique_ptr<Expression> middle, std::unique_ptr<Expression> right)
+        : left_(std::move(left)), middle_(std::move(middle)), right_(std::move(right)) {}
+
+    ~Ternary() override = default;
+
+    void accept(ExpressionVisitor& visitor) override {
+        visitor.visitTernary(*this);
+    }
+
+    [[nodiscard]] const std::unique_ptr<Expression>& getLeft() const {
+        return left_;
+    }
+
+    [[nodiscard]] const std::unique_ptr<Expression>& getMiddle() const {
+        return middle_;
+    }
+
+    [[nodiscard]] const std::unique_ptr<Expression>& getRight() const {
+        return right_;
+    }
+
+private:
+    std::unique_ptr<Expression> left_;
+    std::unique_ptr<Expression> middle_;
     std::unique_ptr<Expression> right_;
 };
 

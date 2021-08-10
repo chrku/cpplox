@@ -35,11 +35,23 @@ std::unique_ptr<Expression> Parser::comma() {
 }
 
 std::unique_ptr<Expression> Parser::equality() {
-    auto left = comparison();
+    auto left = ternary();
     while (match({TokenType::BANG_EQUAL, TokenType::EQUAL_EQUAL})) {
         auto op = previous();
-        auto right = comparison();
+        auto right = ternary();
         left = std::make_unique<Binary>(std::move(left), op, std::move(right));
+    }
+
+    return left;
+}
+
+std::unique_ptr<Expression> Parser::ternary() {
+    auto left = comparison();
+    while (match({TokenType::QUESTION_MARK})) {
+        auto middle = expression();
+        consume(TokenType::COLON, "Colon expected");
+        auto right = comparison();
+        left = std::make_unique<Ternary>(std::move(left), std::move(middle), std::move(right));
     }
 
     return left;
