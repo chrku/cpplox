@@ -5,7 +5,8 @@
 #ifndef LOX_ASTPRINTER_H
 #define LOX_ASTPRINTER_H
 
-#include "ast.h"
+#include "types.h"
+#include "expressions.h"
 
 #include <string>
 #include <sstream>
@@ -19,6 +20,8 @@ private:
     void visitGrouping(Grouping& g) override;
     void visitLiteral(Literal& l) override;
     void visitUnary(Unary& u) override;
+
+    ~AstPrinter() override = default;
 
     std::stringstream stream_{};
 };

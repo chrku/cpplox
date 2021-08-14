@@ -11,4 +11,5 @@ add_executable(lox
                src/token_type.cpp
                src/parser.cpp
                src/astprinter.cpp
-               src/interpreter.cpp)
+               src/interpreter.cpp
+               src/types.cpp)

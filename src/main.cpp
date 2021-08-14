@@ -2,7 +2,7 @@
 #include <memory>
 
 #include "lox.h"
-#include "ast.h"
+#include "types.h"
 
 int main(int argc, const char *argv[]) {
     std::shared_ptr<LoxInterpreter> interpreter = std::make_shared<LoxInterpreter>();

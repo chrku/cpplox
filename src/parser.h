@@ -7,7 +7,9 @@
 
 #include "lox.h"
 #include "token.h"
-#include "ast.h"
+#include "types.h"
+#include "expressions.h"
+#include "statements.h"
 
 #include <memory>
 #include <vector>
@@ -36,7 +38,7 @@ public:
      * Execute recursive descent parsing procedure
      * @return AST tree root
      */
-    std::unique_ptr<Expression> parse();
+    std::vector<std::unique_ptr<Statement>> parse();
 private:
     std::shared_ptr<std::vector<Token>> tokens_;
     std::shared_ptr<LoxInterpreter> interpreter_;
@@ -44,6 +46,10 @@ private:
     int current_ = 0;
 
     // Parsing routines for different grammar rules
+    std::unique_ptr<Statement> statement();
+    std::unique_ptr<Statement> expressionStatement();
+    std::unique_ptr<Statement> printStatement();
+
     std::unique_ptr<Expression> expression();
     std::unique_ptr<Expression> comma();
     std::unique_ptr<Expression> equality();

@@ -11,12 +11,38 @@
 Parser::Parser(std::shared_ptr<std::vector<Token>> tokens, std::shared_ptr<LoxInterpreter> interpreter)
     : tokens_(std::move(tokens)), interpreter_(std::move(interpreter)) {}
 
-std::unique_ptr<Expression> Parser::parse() {
+std::vector<std::unique_ptr<Statement>> Parser::parse() {
     try {
-        return expression();
+        std::vector<std::unique_ptr<Statement>> statements{};
+
+        while (!isAtEnd()) {
+            statements.push_back(statement());
+        }
+
+        return statements;
     } catch (const ParseError& e) {
         return {};
     }
+}
+
+std::unique_ptr<Statement> Parser::statement() {
+    if (match({TokenType::PRINT})) {
+        return printStatement();
+    }
+
+    return expressionStatement();
+}
+
+std::unique_ptr<Statement> Parser::expressionStatement() {
+    std::unique_ptr<Expression> expr = expression();
+    consume(TokenType::SEMICOLON, "Expect ';' after value.");
+    return std::make_unique<ExpressionStatement>(std::move(expr));
+}
+
+std::unique_ptr<Statement> Parser::printStatement() {
+    std::unique_ptr<Expression> expr = expression();
+    consume(TokenType::SEMICOLON, "Expect ';' after value.");
+    return std::make_unique<PrintStatement>(std::move(expr));
 }
 
 std::unique_ptr<Expression> Parser::expression() {

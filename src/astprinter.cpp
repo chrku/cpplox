@@ -5,6 +5,7 @@
 #include "astprinter.h"
 
 #include "utils.h"
+#include "expressions.h"
 
 #include <sstream>
 

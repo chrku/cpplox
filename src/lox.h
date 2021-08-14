@@ -13,7 +13,7 @@
 #include <memory>
 
 #include "token.h"
-#include "ast.h"
+#include "types.h"
 #include "interpreter.h"
 
 /*!
@@ -47,14 +47,14 @@ public:
     void error(int line, std::string_view message);
 
     void error(const Token& token, std::string_view message);
+
+    void runtimeError(const RuntimeError& e);
 private:
     bool hadError_ = false;
     bool hadRuntimeError_ = false;
     Interpreter interpreter_;
 
     void reportError(int line, std::string_view where, std::string_view message);
-    static std::string stringify(const LoxType& l);
-    void runtimeError(const RuntimeError& e);
 };
 
 #endif //LOX_LOX_H

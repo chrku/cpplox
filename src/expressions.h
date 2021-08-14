@@ -1,26 +1,15 @@
 //
-// Created by chrku on 08.08.2021.
+// Created by chrku on 14.08.2021.
 //
 
-#ifndef LOX_AST_H
-#define LOX_AST_H
-
-#include "token.h"
-
-#include <memory>
-#include <utility>
-
-/*!
- * Represents null values
- */
-class NullType {};
+#ifndef LOX_EXPRESSIONS_H
+#define LOX_EXPRESSIONS_H
 
 class Binary;
 class Ternary;
 class Grouping;
 class Literal;
 class Unary;
-class Expression;
 
 /*!
  * AST visitor interface
@@ -32,12 +21,9 @@ public:
     virtual void visitGrouping(Grouping& g) = 0;
     virtual void visitLiteral(Literal& l) = 0;
     virtual void visitUnary(Unary& u) = 0;
-};
 
-/*!
- * Representation of the types a Lox expression can return
- */
-using LoxType = std::variant<double, std::string, bool, NullType>;
+    virtual ~ExpressionVisitor() = default;
+};
 
 /*!
  * Abstract base class for expressions
@@ -47,6 +33,8 @@ public:
     virtual ~Expression() = default;
     virtual void accept (ExpressionVisitor& visitor) = 0;
 };
+
+class Binary;
 
 /*!
  * Expressions with arity two
@@ -80,6 +68,8 @@ private:
     std::unique_ptr<Expression> right_;
 };
 
+class Ternary;
+
 /*!
  * Represents ternary conditional operator
  */
@@ -112,6 +102,8 @@ private:
     std::unique_ptr<Expression> right_;
 };
 
+class Grouping;
+
 /*!
  * Expressions in parentheses
  */
@@ -131,6 +123,8 @@ public:
 private:
     std::unique_ptr<Expression> expression_;
 };
+
+class Literal;
 
 /*!
  * Literal expressions
@@ -154,6 +148,8 @@ public:
 private:
     LoxType value_;
 };
+
+class Unary;
 
 /*!
  * Unary expressions
@@ -180,4 +176,8 @@ private:
     std::unique_ptr<Expression> right_;
 };
 
-#endif //LOX_AST_H
+#include <memory>
+#include <utility>
+#include "token.h"
+
+#endif //LOX_EXPRESSIONS_H

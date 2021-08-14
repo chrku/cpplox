@@ -5,6 +5,9 @@
 #include "interpreter.h"
 
 #include "utils.h"
+#include "lox.h"
+
+#include <iostream>
 
 RuntimeError::RuntimeError(Token t, const std::string &message) : std::runtime_error(message), token_(std::move(t)) {
 }
@@ -13,9 +16,24 @@ const Token& RuntimeError::getToken() const {
     return token_;
 }
 
+void Interpreter::interpret(std::vector<std::unique_ptr<Statement>>& program,
+                            const std::shared_ptr<LoxInterpreter>& context) {
+    try {
+        for (std::unique_ptr<Statement>& stmt : program) {
+            execute(*stmt);
+        }
+    } catch (const RuntimeError& error) {
+        context->runtimeError(error);
+    }
+}
+
 LoxType Interpreter::evaluate(Expression& expr) {
     expr.accept(*this);
     return valueStack_.back();
+}
+
+void Interpreter::execute(Statement& statement) {
+    statement.accept(*this);
 }
 
 void Interpreter::visitBinary(Binary& b) {
@@ -137,6 +155,20 @@ void Interpreter::visitUnary(Unary& u) {
         default:
             throw std::runtime_error("This should never happen.");
     }
+}
+
+void Interpreter::visitExpressionStatement(ExpressionStatement& s) {
+    // Evaluate and discard
+    evaluate(*s.getExpression());
+    valueStack_.pop_back();
+}
+
+void Interpreter::visitPrintStatement(PrintStatement &p) {
+    evaluate(*p.getExpression());
+    LoxType result_val = valueStack_.back();
+    valueStack_.pop_back();
+
+    std::cout << stringify(result_val) << '\n';
 }
 
 bool Interpreter::isTruthy(const LoxType& t) {

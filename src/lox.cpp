@@ -53,8 +53,7 @@ void LoxInterpreter::run(std::unique_ptr<std::string> source) {
 
     if (hadError_) return;
     try {
-        LoxType result = interpreter_.evaluate(*expr);
-        std::cout << stringify(result) << std::endl;
+        interpreter_.interpret(expr, shared_from_this());
     } catch (const RuntimeError& error) {
         runtimeError(error);
     }
@@ -77,28 +76,8 @@ void LoxInterpreter::error(const Token& token, std::string_view message) {
     }
 }
 
-std::string LoxInterpreter::stringify(const LoxType &l) {
-    std::string return_value;
-
-    std::visit(overload{
-            [&](double d) {
-                return_value = std::to_string(d);
-            },
-            [&](const std::string& s) {
-                return_value = s;
-            },
-            [&](const NullType& n) {
-                return_value = "nil";
-            },
-            [&](bool b) {
-                return_value = std::to_string(b);
-            }
-    }, l);
-
-    return return_value;
-}
-
 void LoxInterpreter::runtimeError(const RuntimeError& e) {
     std::cout << e.what() << "\nline " << e.getToken().getLine() << "]\n";
     hadRuntimeError_ = true;
 }
+

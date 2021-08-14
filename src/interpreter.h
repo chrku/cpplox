@@ -5,14 +5,18 @@
 #ifndef LOX_INTERPRETER_H
 #define LOX_INTERPRETER_H
 
-#include "ast.h"
+#include "types.h"
+#include "expressions.h"
+#include "statements.h"
 
 #include <vector>
 #include <string_view>
 
+class LoxInterpreter;
+
 /*!
  * Represents runtime errors in Lox
- * E.g. Type errors, Divide by Zero, etc.
+ * E.g. Type errors, etc.
  */
 class RuntimeError : public std::runtime_error {
 public:
@@ -32,14 +36,29 @@ private:
     Token token_;
 };
 
-class Interpreter : public ExpressionVisitor {
+class Interpreter : public ExpressionVisitor, public StatementVisitor {
 public:
+    /*!
+     *
+     * @param program
+     */
+    void interpret(std::vector<std::unique_ptr<Statement>>& program,
+                   const std::shared_ptr<LoxInterpreter>& context);
+
     /*!
      * Evaluate a Lox expression
      * @param expr Expression to be evaluated
      * @return Returned value, a Lox type (double, bool, null or string)
      */
     LoxType evaluate(Expression& expr);
+
+    /*!
+     *
+     * @param statement
+     */
+    void execute(Statement& statement);
+
+    ~Interpreter() override = default;
 private:
     std::vector<LoxType> valueStack_;
 
@@ -48,6 +67,11 @@ private:
     void visitGrouping(Grouping &g) override;
     void visitLiteral(Literal &l) override;
     void visitUnary(Unary &u) override;
+
+    void visitExpressionStatement(ExpressionStatement &s) override;
+    void visitPrintStatement(PrintStatement &p) override;
+
+private:
 
     [[nodiscard]] static bool isTruthy(const LoxType& t);
     [[nodiscard]] static double negate(const Token& op, const LoxType& t);
