@@ -8,6 +8,7 @@
 #include "types.h"
 #include "expressions.h"
 #include "statements.h"
+#include "environment.h"
 
 #include <vector>
 #include <string_view>
@@ -61,17 +62,18 @@ public:
     ~Interpreter() override = default;
 private:
     std::vector<LoxType> valueStack_;
+    Environment environment_;
 
     void visitBinary(Binary &b) override;
     void visitTernary(Ternary &t) override;
     void visitGrouping(Grouping &g) override;
     void visitLiteral(Literal &l) override;
     void visitUnary(Unary &u) override;
+    void visitVariableAccess(VariableAccess& v) override;
 
-    void visitExpressionStatement(ExpressionStatement &s) override;
-    void visitPrintStatement(PrintStatement &p) override;
-
-private:
+    void visitExpressionStatement(ExpressionStatement& s) override;
+    void visitPrintStatement(PrintStatement& p) override;
+    void visitVariableDeclaration(VariableDeclaration& v) override;
 
     [[nodiscard]] static bool isTruthy(const LoxType& t);
     [[nodiscard]] static double negate(const Token& op, const LoxType& t);

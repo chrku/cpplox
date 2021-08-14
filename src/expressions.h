@@ -10,6 +10,7 @@ class Ternary;
 class Grouping;
 class Literal;
 class Unary;
+class VariableAccess;
 
 /*!
  * AST visitor interface
@@ -21,6 +22,7 @@ public:
     virtual void visitGrouping(Grouping& g) = 0;
     virtual void visitLiteral(Literal& l) = 0;
     virtual void visitUnary(Unary& u) = 0;
+    virtual void visitVariableAccess(VariableAccess& v) = 0;
 
     virtual ~ExpressionVisitor() = default;
 };
@@ -33,8 +35,6 @@ public:
     virtual ~Expression() = default;
     virtual void accept (ExpressionVisitor& visitor) = 0;
 };
-
-class Binary;
 
 /*!
  * Expressions with arity two
@@ -68,8 +68,6 @@ private:
     std::unique_ptr<Expression> right_;
 };
 
-class Ternary;
-
 /*!
  * Represents ternary conditional operator
  */
@@ -102,8 +100,6 @@ private:
     std::unique_ptr<Expression> right_;
 };
 
-class Grouping;
-
 /*!
  * Expressions in parentheses
  */
@@ -123,8 +119,6 @@ public:
 private:
     std::unique_ptr<Expression> expression_;
 };
-
-class Literal;
 
 /*!
  * Literal expressions
@@ -149,14 +143,12 @@ private:
     LoxType value_;
 };
 
-class Unary;
-
 /*!
  * Unary expressions
  */
 class Unary : public Expression {
 public:
-    Unary(Token  op, std::unique_ptr<Expression> right) : operator_(std::move(op)), right_(std::move(right)) {}
+    Unary(Token op, std::unique_ptr<Expression> right) : operator_(std::move(op)), right_(std::move(right)) {}
 
     ~Unary() override = default;
 
@@ -174,6 +166,24 @@ public:
 private:
     Token operator_;
     std::unique_ptr<Expression> right_;
+};
+
+class VariableAccess : public Expression {
+public:
+    explicit VariableAccess(Token name) : name_(std::move(name)) {}
+
+    ~VariableAccess() override = default;
+
+    void accept (ExpressionVisitor& visitor) override {
+        return visitor.visitVariableAccess(*this);
+    }
+
+    [[nodiscard]] const Token& getToken() {
+        return name_;
+    }
+
+private:
+    Token name_;
 };
 
 #include <memory>

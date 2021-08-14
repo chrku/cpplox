@@ -157,6 +157,10 @@ void Interpreter::visitUnary(Unary& u) {
     }
 }
 
+void Interpreter::visitVariableAccess(VariableAccess& v) {
+    valueStack_.emplace_back(environment_.get(v.getToken()));
+}
+
 void Interpreter::visitExpressionStatement(ExpressionStatement& s) {
     // Evaluate and discard
     evaluate(*s.getExpression());
@@ -169,6 +173,19 @@ void Interpreter::visitPrintStatement(PrintStatement &p) {
     valueStack_.pop_back();
 
     std::cout << stringify(result_val) << '\n';
+}
+
+void Interpreter::visitVariableDeclaration(VariableDeclaration& v) {
+
+    LoxType value = NullType{};
+
+    if (v.getExpression()) {
+        evaluate(*v.getExpression());
+        value = valueStack_.back();
+        valueStack_.pop_back();
+    }
+
+    environment_.define(v.getToken().getLexeme(), value);
 }
 
 bool Interpreter::isTruthy(const LoxType& t) {
@@ -267,4 +284,5 @@ void Interpreter::checkNumberOperands(const Token& op, const LoxType& t1, const 
 
     throw RuntimeError(op, "Operands must be numbers");
 }
+
 

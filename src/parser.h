@@ -46,6 +46,8 @@ private:
     int current_ = 0;
 
     // Parsing routines for different grammar rules
+    std::unique_ptr<Statement> declaration();
+    std::unique_ptr<Statement> varDeclaration();
     std::unique_ptr<Statement> statement();
     std::unique_ptr<Statement> expressionStatement();
     std::unique_ptr<Statement> printStatement();

@@ -6,7 +6,6 @@
 #include "scanner.h"
 #include "parser.h"
 #include "interpreter.h"
-#include "astprinter.h"
 #include "utils.h"
 
 #include <fstream>

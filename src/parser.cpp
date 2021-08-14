@@ -12,17 +12,35 @@ Parser::Parser(std::shared_ptr<std::vector<Token>> tokens, std::shared_ptr<LoxIn
     : tokens_(std::move(tokens)), interpreter_(std::move(interpreter)) {}
 
 std::vector<std::unique_ptr<Statement>> Parser::parse() {
+    std::vector<std::unique_ptr<Statement>> statements{};
+
+    while (!isAtEnd()) {
+        statements.push_back(declaration());
+    }
+
+    return statements;
+}
+
+std::unique_ptr<Statement> Parser::declaration() {
     try {
-        std::vector<std::unique_ptr<Statement>> statements{};
-
-        while (!isAtEnd()) {
-            statements.push_back(statement());
-        }
-
-        return statements;
+        if (match({TokenType::VAR})) { return varDeclaration(); }
+        return statement();
     } catch (const ParseError& e) {
+        synchronize();
         return {};
     }
+}
+
+std::unique_ptr<Statement> Parser::varDeclaration() {
+    const Token& name = consume(TokenType::IDENTIFIER, "Expect variable name.");
+
+    std::unique_ptr<Expression> initializer{};
+    if (match({TokenType::EQUAL})) {
+        initializer = expression();
+    }
+
+    consume(TokenType::SEMICOLON, "Expect ';' after variable declaration");
+    return std::make_unique<VariableDeclaration>(std::move(initializer), name);
 }
 
 std::unique_ptr<Statement> Parser::statement() {
@@ -145,6 +163,10 @@ std::unique_ptr<Expression> Parser::primary() {
         }, previous().getLiteral());
 
         return literal;
+    }
+
+    if (match({TokenType::IDENTIFIER})) {
+        return std::make_unique<VariableAccess>(previous());
     }
 
     if (match({TokenType::LEFT_PAREN})) {
