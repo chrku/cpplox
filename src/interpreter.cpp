@@ -47,12 +47,23 @@ void Interpreter::visitBinary(Binary& b) {
                 double left = std::get<double>(left_val);
                 double right = std::get<double>(right_val);
                 valueStack_.emplace_back(left + right);
-            }
-            else if (std::holds_alternative<std::string>(left_val) && std::holds_alternative<std::string>(right_val)) {
+            } else if (std::holds_alternative<std::string>(left_val) && std::holds_alternative<std::string>(right_val)) {
                 const std::string& left = std::get<std::string>(left_val);
                 const std::string& right = std::get<std::string>(right_val);
                 valueStack_.emplace_back(left + right);
-            } else {
+            } else if ((std::holds_alternative<std::string>(left_val) && std::holds_alternative<double>(right_val)) ||
+                    (std::holds_alternative<double>(left_val) && std::holds_alternative<std::string>(right_val))) {
+                if (std::holds_alternative<double>(left_val)) {
+                    const std::string& right = std::get<std::string>(right_val);
+                    const std::string left = std::to_string(std::get<double>(left_val));
+                    valueStack_.emplace_back(left + right);
+                } else {
+                    const std::string& left = std::get<std::string>(left_val);
+                    const std::string right = std::to_string(std::get<double>(right_val));
+                    valueStack_.emplace_back(left + right);
+                }
+            }
+            else {
                 throw RuntimeError(b.getOperator(), "Operands must be numbers or strings");
             }
             break;
