@@ -10,9 +10,23 @@
 #include <vector>
 #include <string_view>
 
+/*!
+ * Represents runtime errors in Lox
+ * E.g. Type errors, Divide by Zero, etc.
+ */
 class RuntimeError : public std::runtime_error {
 public:
+    /*!
+     *
+     * @param t Token where the error occurred
+     * @param message Error message
+     */
     RuntimeError(Token t, const std::string& message);
+
+    /*!
+     * Get the token responsible for the error
+     * @return The token
+     */
     [[nodiscard]] const Token& getToken() const;
 private:
     Token token_;
@@ -20,6 +34,11 @@ private:
 
 class Interpreter : public ExpressionVisitor {
 public:
+    /*!
+     * Evaluate a Lox expression
+     * @param expr Expression to be evaluated
+     * @return Returned value, a Lox type (double, bool, null or string)
+     */
     LoxType evaluate(Expression& expr);
 private:
     std::vector<LoxType> valueStack_;

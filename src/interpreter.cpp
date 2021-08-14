@@ -4,8 +4,6 @@
 
 #include "interpreter.h"
 
-#include <utility>
-
 #include "utils.h"
 
 RuntimeError::RuntimeError(Token t, const std::string &message) : std::runtime_error(message), token_(std::move(t)) {
@@ -77,11 +75,9 @@ void Interpreter::visitBinary(Binary& b) {
             break;
 
         case TokenType::BANG_EQUAL:
-            checkNumberOperands(b.getOperator(), left_val, right_val);
             valueStack_.emplace_back(!isEqual(left_val, right_val));
             break;
         case TokenType::EQUAL_EQUAL:
-            checkNumberOperands(b.getOperator(), left_val, right_val);
             valueStack_.emplace_back(isEqual(left_val, right_val));
             break;
         case TokenType::COMMA:
