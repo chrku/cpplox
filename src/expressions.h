@@ -171,6 +171,9 @@ private:
     std::unique_ptr<Expression> right_;
 };
 
+/*!
+ * Variable access expressions
+ */
 class VariableAccess : public Expression {
 public:
     explicit VariableAccess(Token name) : name_(std::move(name)) {}
@@ -193,10 +196,13 @@ private:
     Token name_;
 };
 
+/*!
+ * Assignment expressions
+ */
 class Assignment : public Expression {
 public:
-    Assignment(const Token& name, std::unique_ptr<Expression> expression)
-        : name_(name), value_(std::move(expression)) {}
+    Assignment(Token name, std::unique_ptr<Expression> expression)
+        : name_(std::move(name)), value_(std::move(expression)) {}
 
     ~Assignment() override = default;
 

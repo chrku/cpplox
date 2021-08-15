@@ -44,6 +44,7 @@ public:
      */
     Token(TokenType type, std::string_view lexeme, int line, std::string_view value);
 
+    // Getters for attributes
     [[nodiscard]] TokenType getType() const;
     [[nodiscard]] const std::variant<std::monostate, double, std::string>& getLiteral() const;
     [[nodiscard]] const std::string& getLexeme() const;

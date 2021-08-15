@@ -40,13 +40,14 @@ private:
 class Interpreter : public ExpressionVisitor, public StatementVisitor {
 public:
     /*!
-     *
+     * Construct interpreter instance, initialize empty environment
      */
     Interpreter();
 
     /*!
-     *
-     * @param program
+     * Interpret lox program
+     * @param program sequence of statements
+     * @param context interpreter context for error reporting
      */
     void interpret(std::vector<std::unique_ptr<Statement>>& program,
                    const std::shared_ptr<LoxInterpreter>& context);
@@ -59,8 +60,8 @@ public:
     LoxType evaluate(Expression& expr);
 
     /*!
-     *
-     * @param statement
+     * Execute a lox statement
+     * @param statement statement to execute
      */
     void execute(Statement& statement);
 

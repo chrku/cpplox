@@ -35,21 +35,30 @@ public:
     explicit Parser(std::shared_ptr<std::vector<Token>> tokens, std::shared_ptr<LoxInterpreter> interpreter);
 
     /*!
-     * Execute recursive descent parsing procedure
-     * @return AST tree root
+     * Parse a lox program
+     * @return List of lox statements constituting program
      */
     std::vector<std::unique_ptr<Statement>> parse();
 
+    /*!
+     * Parse an expression
+     * @return Expression AST tree root
+     */
     std::unique_ptr<Expression> parseExpression();
 
+    /*!
+     * Reset parser state and errors
+     */
     void reset();
 private:
     std::shared_ptr<std::vector<Token>> tokens_;
     std::shared_ptr<LoxInterpreter> interpreter_;
 
+    // Position in token stream
     int current_ = 0;
 
     // Parsing routines for different grammar rules
+    // Statements
     std::unique_ptr<Statement> declaration();
     std::unique_ptr<Statement> varDeclaration();
     std::unique_ptr<Statement> statement();
@@ -57,6 +66,7 @@ private:
     std::vector<std::unique_ptr<Statement>> block();
     std::unique_ptr<Statement> printStatement();
 
+    // Expressions
     std::unique_ptr<Expression> expression();
     std::unique_ptr<Expression> assignment();
     std::unique_ptr<Expression> comma();

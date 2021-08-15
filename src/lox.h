@@ -46,8 +46,17 @@ public:
      */
     void error(int line, std::string_view message);
 
+    /*!
+     * Report error
+     * @param token Token where error occured
+     * @param message error message
+     */
     void error(const Token& token, std::string_view message);
 
+    /*!
+     * Report runtime error
+     * @param e runtime error exception object
+     */
     void runtimeError(const RuntimeError& e);
 private:
     bool hadError_ = false;
@@ -56,6 +65,8 @@ private:
     Interpreter interpreter_;
 
     void reportError(int line, std::string_view where, std::string_view message);
+
+    // For REPL functionality, we sometimes need to disable parse error reporting
     void enableParseErrorReporting();
     void disableParseErrorReporting();
 };
