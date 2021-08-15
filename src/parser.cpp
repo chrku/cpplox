@@ -68,11 +68,32 @@ std::unique_ptr<Expression> Parser::expression() {
 }
 
 std::unique_ptr<Expression> Parser::comma() {
-    auto left = equality();
+    auto left = assignment();
     while (match({TokenType::COMMA})) {
         auto op = previous();
-        auto right = equality();
+        auto right = assignment();
         left = std::make_unique<Binary>(std::move(left), op, std::move(right));
+    }
+
+    return left;
+}
+
+std::unique_ptr<Expression> Parser::assignment() {
+    auto left = equality();
+
+    if (match({TokenType::EQUAL})) {
+        const Token& equals = previous();
+        auto right = assignment();
+
+        if (left->lvalue()) {
+            auto* var_access = dynamic_cast<VariableAccess*>(left.get());
+            if (var_access) {
+                const Token& name = var_access->getToken();
+                return std::make_unique<Assignment>(name, std::move(right));
+            }
+        }
+
+        error(equals, "Invalid assignment target, has to be lvalue.");
     }
 
     return left;
@@ -242,4 +263,5 @@ void Parser::synchronize() {
         advance();
     }
 }
+
 

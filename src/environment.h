@@ -14,6 +14,7 @@ class Environment {
 public:
     void define(const std::string& name, LoxType value);
     const LoxType& get(const Token& token);
+    void assign(const Token& name, LoxType value);
 private:
     std::unordered_map<std::string, LoxType> values_;
 };

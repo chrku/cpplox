@@ -11,6 +11,7 @@ class Grouping;
 class Literal;
 class Unary;
 class VariableAccess;
+class Assignment;
 
 /*!
  * AST visitor interface
@@ -23,6 +24,7 @@ public:
     virtual void visitLiteral(Literal& l) = 0;
     virtual void visitUnary(Unary& u) = 0;
     virtual void visitVariableAccess(VariableAccess& v) = 0;
+    virtual void visitAssignment(Assignment& a) = 0;
 
     virtual ~ExpressionVisitor() = default;
 };
@@ -34,6 +36,7 @@ class Expression {
 public:
     virtual ~Expression() = default;
     virtual void accept (ExpressionVisitor& visitor) = 0;
+    [[nodiscard]] virtual bool lvalue() const { return false; }
 };
 
 /*!
@@ -109,7 +112,7 @@ public:
 
     ~Grouping() override = default;
 
-    void accept (ExpressionVisitor& visitor) override {
+    void accept(ExpressionVisitor& visitor) override {
         visitor.visitGrouping(*this);
     }
 
@@ -132,7 +135,7 @@ public:
 
     ~Literal() override = default;
 
-    void accept (ExpressionVisitor& visitor) override {
+    void accept(ExpressionVisitor& visitor) override {
         return visitor.visitLiteral(*this);
     }
 
@@ -152,7 +155,7 @@ public:
 
     ~Unary() override = default;
 
-    void accept (ExpressionVisitor& visitor) override {
+    void accept(ExpressionVisitor& visitor) override {
         return visitor.visitUnary(*this);
     }
 
@@ -174,7 +177,7 @@ public:
 
     ~VariableAccess() override = default;
 
-    void accept (ExpressionVisitor& visitor) override {
+    void accept(ExpressionVisitor& visitor) override {
         return visitor.visitVariableAccess(*this);
     }
 
@@ -182,8 +185,36 @@ public:
         return name_;
     }
 
+    [[nodiscard]] bool lvalue() const override {
+        return true;
+    }
+
 private:
     Token name_;
+};
+
+class Assignment : public Expression {
+public:
+    Assignment(const Token& name, std::unique_ptr<Expression> expression)
+        : name_(name), value_(std::move(expression)) {}
+
+    ~Assignment() override = default;
+
+    void accept(ExpressionVisitor& visitor) override {
+        return visitor.visitAssignment(*this);
+    }
+
+    [[nodiscard]] const Token& getName() const {
+        return name_;
+    }
+
+    [[nodiscard]] const std::unique_ptr<Expression>& getValue() const {
+        return value_;
+    }
+
+private:
+    Token name_;
+    std::unique_ptr<Expression> value_;
 };
 
 #include <memory>

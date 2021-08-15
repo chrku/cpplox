@@ -53,6 +53,7 @@ private:
     std::unique_ptr<Statement> printStatement();
 
     std::unique_ptr<Expression> expression();
+    std::unique_ptr<Expression> assignment();
     std::unique_ptr<Expression> comma();
     std::unique_ptr<Expression> equality();
     std::unique_ptr<Expression> ternary();

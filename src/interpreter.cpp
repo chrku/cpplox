@@ -161,6 +161,14 @@ void Interpreter::visitVariableAccess(VariableAccess& v) {
     valueStack_.emplace_back(environment_.get(v.getToken()));
 }
 
+void Interpreter::visitAssignment(Assignment& a) {
+    evaluate(*a.getValue());
+
+    // Get result of expression
+    LoxType result_val = valueStack_.back();
+    environment_.assign(a.getName(), result_val);
+}
+
 void Interpreter::visitExpressionStatement(ExpressionStatement& s) {
     // Evaluate and discard
     evaluate(*s.getExpression());
@@ -284,5 +292,6 @@ void Interpreter::checkNumberOperands(const Token& op, const LoxType& t1, const 
 
     throw RuntimeError(op, "Operands must be numbers");
 }
+
 
 
