@@ -6,18 +6,21 @@
 #define LOX_STATEMENTS_H
 
 #include <utility>
+#include <vector>
 
 #include "expressions.h"
 
 class ExpressionStatement;
 class PrintStatement;
 class VariableDeclaration;
+class Block;
 
 class StatementVisitor {
 public:
     virtual void visitExpressionStatement(ExpressionStatement& s) = 0;
     virtual void visitPrintStatement(PrintStatement& p) = 0;
     virtual void visitVariableDeclaration(VariableDeclaration& v) = 0;
+    virtual void visitBlock(Block& b) = 0;
 
     virtual ~StatementVisitor() = default;
 };
@@ -90,6 +93,24 @@ public:
 
 private:
     std::unique_ptr<Expression> expression_;
+};
+
+class Block : public Statement {
+public:
+    explicit Block(std::vector<std::unique_ptr<Statement>>&& statements) : statements_(std::move(statements)) {}
+
+    ~Block() override = default;
+
+    void accept(StatementVisitor& visitor) override {
+        visitor.visitBlock(*this);
+    }
+
+    [[nodiscard]] std::vector<std::unique_ptr<Statement>>& getStatements() {
+        return statements_;
+    }
+
+private:
+    std::vector<std::unique_ptr<Statement>> statements_;
 };
 
 #endif //LOX_STATEMENTS_H

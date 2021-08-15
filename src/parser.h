@@ -50,6 +50,7 @@ private:
     std::unique_ptr<Statement> varDeclaration();
     std::unique_ptr<Statement> statement();
     std::unique_ptr<Statement> expressionStatement();
+    std::vector<std::unique_ptr<Statement>> block();
     std::unique_ptr<Statement> printStatement();
 
     std::unique_ptr<Expression> expression();

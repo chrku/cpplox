@@ -41,6 +41,11 @@ class Interpreter : public ExpressionVisitor, public StatementVisitor {
 public:
     /*!
      *
+     */
+    Interpreter();
+
+    /*!
+     *
      * @param program
      */
     void interpret(std::vector<std::unique_ptr<Statement>>& program,
@@ -62,7 +67,7 @@ public:
     ~Interpreter() override = default;
 private:
     std::vector<LoxType> valueStack_;
-    Environment environment_;
+    std::shared_ptr<Environment> environment_;
 
     void visitBinary(Binary &b) override;
     void visitTernary(Ternary &t) override;
@@ -75,13 +80,16 @@ private:
     void visitExpressionStatement(ExpressionStatement& s) override;
     void visitPrintStatement(PrintStatement& p) override;
     void visitVariableDeclaration(VariableDeclaration& v) override;
+    void visitBlock(Block& b) override;
 
     [[nodiscard]] static bool isTruthy(const LoxType& t);
     [[nodiscard]] static double negate(const Token& op, const LoxType& t);
     [[nodiscard]] static double toDouble(const LoxType& t);
     [[nodiscard]] static bool isEqual(const LoxType& t1, const LoxType& t2);
 
-    static void checkNumberOperands(const Token& op, const LoxType& t1, const LoxType& t2) ;
+    static void checkNumberOperands(const Token& op, const LoxType& t1, const LoxType& t2);
+    void executeBlock(std::vector<std::unique_ptr<Statement>>& statements,
+                      std::shared_ptr<Environment> new_environment);
 };
 
 

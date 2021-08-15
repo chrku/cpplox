@@ -17,6 +17,8 @@ const LoxType& Environment::get(const Token& token) {
         return values_[token.getLexeme()];
     }
 
+    if (enclosing_) { return enclosing_->get(token); }
+
     throw RuntimeError(token,
                        "Undefined variable '" + token.getLexeme() + "'.");
 }
@@ -27,6 +29,15 @@ void Environment::assign(const Token& name, LoxType value) {
         return;
     }
 
+    if (enclosing_) {
+        enclosing_->assign(name, value);
+        return;
+    }
+
     throw RuntimeError(name,
                        "Undefined variable '" + name.getLexeme() + "'.");
+}
+
+void Environment::setEnclosing(std::shared_ptr<Environment> enclosing) {
+    enclosing_ = std::move(enclosing);
 }

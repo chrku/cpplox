@@ -8,12 +8,16 @@
 #include "lox.h"
 
 #include <iostream>
+#include <utility>
 
 RuntimeError::RuntimeError(Token t, const std::string &message) : std::runtime_error(message), token_(std::move(t)) {
 }
 
 const Token& RuntimeError::getToken() const {
     return token_;
+}
+
+Interpreter::Interpreter() : valueStack_{}, environment_{std::make_shared<Environment>()} {
 }
 
 void Interpreter::interpret(std::vector<std::unique_ptr<Statement>>& program,
@@ -158,7 +162,7 @@ void Interpreter::visitUnary(Unary& u) {
 }
 
 void Interpreter::visitVariableAccess(VariableAccess& v) {
-    valueStack_.emplace_back(environment_.get(v.getToken()));
+    valueStack_.emplace_back(environment_->get(v.getToken()));
 }
 
 void Interpreter::visitAssignment(Assignment& a) {
@@ -166,7 +170,7 @@ void Interpreter::visitAssignment(Assignment& a) {
 
     // Get result of expression
     LoxType result_val = valueStack_.back();
-    environment_.assign(a.getName(), result_val);
+    environment_->assign(a.getName(), result_val);
 }
 
 void Interpreter::visitExpressionStatement(ExpressionStatement& s) {
@@ -193,7 +197,13 @@ void Interpreter::visitVariableDeclaration(VariableDeclaration& v) {
         valueStack_.pop_back();
     }
 
-    environment_.define(v.getToken().getLexeme(), value);
+    environment_->define(v.getToken().getLexeme(), value);
+}
+
+void Interpreter::visitBlock(Block& b) {
+    std::shared_ptr<Environment> new_environment = std::make_shared<Environment>();
+    new_environment->setEnclosing(environment_);
+    executeBlock(b.getStatements(), new_environment);
 }
 
 bool Interpreter::isTruthy(const LoxType& t) {
@@ -292,6 +302,25 @@ void Interpreter::checkNumberOperands(const Token& op, const LoxType& t1, const 
 
     throw RuntimeError(op, "Operands must be numbers");
 }
+
+void Interpreter::executeBlock(std::vector<std::unique_ptr<Statement>> &statements,
+                               std::shared_ptr<Environment> new_environment) {
+    // Create a pointer to restore environment in case of error
+    std::shared_ptr<Environment> prior_environment = environment_;
+    try {
+        environment_ = std::move(new_environment);
+
+        for (auto& statement : statements) {
+            execute(*statement);
+        }
+    } catch(...) {
+        environment_ = prior_environment;
+        throw;
+    }
+
+    environment_ = prior_environment;
+}
+
 
 
 
