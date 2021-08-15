@@ -39,6 +39,10 @@ public:
      * @return AST tree root
      */
     std::vector<std::unique_ptr<Statement>> parse();
+
+    std::unique_ptr<Expression> parseExpression();
+
+    void reset();
 private:
     std::shared_ptr<std::vector<Token>> tokens_;
     std::shared_ptr<LoxInterpreter> interpreter_;

@@ -4,8 +4,6 @@
 
 #include "parser.h"
 
-#include "utils.h"
-
 #include <algorithm>
 
 Parser::Parser(std::shared_ptr<std::vector<Token>> tokens, std::shared_ptr<LoxInterpreter> interpreter)
@@ -19,6 +17,18 @@ std::vector<std::unique_ptr<Statement>> Parser::parse() {
     }
 
     return statements;
+}
+
+std::unique_ptr<Expression> Parser::parseExpression() {
+    try {
+        return expression();
+    } catch (const ParseError& e) {
+        return {};
+    }
+}
+
+void Parser::reset() {
+    current_ = 0;
 }
 
 std::unique_ptr<Statement> Parser::declaration() {

@@ -21,7 +21,7 @@ void LoxInterpreter::runFile(const char *filename) {
     // Read file into string
     auto source = std::make_unique<std::string>(std::istreambuf_iterator<char>(ifs),
                                                 std::istreambuf_iterator<char>());
-    run(std::move(source));
+    run(std::move(source), false);
 
     if (hadError_) {
         std::exit(65);
@@ -38,21 +38,42 @@ void LoxInterpreter::runPrompt() {
     while (std::cin) {
         std::cout << "> "; // Prompt character
         std::getline(std::cin, input_line);
-        run(std::make_unique<std::string>(input_line));
+        run(std::make_unique<std::string>(input_line), true);
         hadError_ = false;
     }
 }
 
-void LoxInterpreter::run(std::unique_ptr<std::string> source) {
+void LoxInterpreter::run(std::unique_ptr<std::string> source, bool repl_mode) {
     Scanner scanner{std::move(source), shared_from_this()};
     scanner.scanTokens();
     auto tokens = scanner.getTokens();
     Parser parser{tokens, shared_from_this()};
-    auto expr = parser.parse();
 
-    if (hadError_) return;
+    if (repl_mode) {
+
+        disableParseErrorReporting();
+        auto expression = parser.parseExpression();
+        enableParseErrorReporting();
+
+        if (!hadError_) {
+            try {
+                auto result = interpreter_.evaluate(*expression);
+                std::cout << stringify(result) << std::endl;
+            } catch (const RuntimeError &error) {
+                runtimeError(error);
+            }
+
+            return;
+        }
+        parser.reset();
+        hadError_ = false;
+    }
+
+    auto program = parser.parse();
+    if (hadError_) { return; }
+
     try {
-        interpreter_.interpret(expr, shared_from_this());
+        interpreter_.interpret(program, shared_from_this());
     } catch (const RuntimeError& error) {
         runtimeError(error);
     }
@@ -63,7 +84,9 @@ void LoxInterpreter::error(int line, std::string_view message) {
 }
 
 void LoxInterpreter::reportError(int line, std::string_view where, std::string_view message) {
-    std::cout << "[line " << line << "] Error" << where << ": " << message << std::endl;
+    if (!silentParseErrors_) {
+        std::cout << "[line " << line << "] Error" << where << ": " << message << std::endl;
+    }
     hadError_ = true;
 }
 
@@ -78,5 +101,13 @@ void LoxInterpreter::error(const Token& token, std::string_view message) {
 void LoxInterpreter::runtimeError(const RuntimeError& e) {
     std::cout << e.what() << "\nline " << e.getToken().getLine() << "]\n";
     hadRuntimeError_ = true;
+}
+
+void LoxInterpreter::enableParseErrorReporting() {
+    silentParseErrors_ = false;
+}
+
+void LoxInterpreter::disableParseErrorReporting() {
+    silentParseErrors_ = true;
 }
 

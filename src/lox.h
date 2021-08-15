@@ -37,7 +37,7 @@ public:
      * does the requisite steps and then runs it
      * @param source fragment of source code to run
      */
-    void run(std::unique_ptr<std::string> source);
+    void run(std::unique_ptr<std::string> source, bool repl_mode);
 
     /*!
      * Report an error in a certain line
@@ -52,9 +52,12 @@ public:
 private:
     bool hadError_ = false;
     bool hadRuntimeError_ = false;
+    bool silentParseErrors_ = false;
     Interpreter interpreter_;
 
     void reportError(int line, std::string_view where, std::string_view message);
+    void enableParseErrorReporting();
+    void disableParseErrorReporting();
 };
 
 #endif //LOX_LOX_H
