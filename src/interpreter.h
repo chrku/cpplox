@@ -82,6 +82,7 @@ private:
     void visitPrintStatement(PrintStatement& p) override;
     void visitVariableDeclaration(VariableDeclaration& v) override;
     void visitBlock(Block& b) override;
+    void visitIfStatement(IfStatement& i) override;
 
     [[nodiscard]] static bool isTruthy(const LoxType& t);
     [[nodiscard]] static double negate(const Token& op, const LoxType& t);

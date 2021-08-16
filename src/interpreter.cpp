@@ -206,6 +206,19 @@ void Interpreter::visitBlock(Block& b) {
     executeBlock(b.getStatements(), new_environment);
 }
 
+void Interpreter::visitIfStatement(IfStatement& i) {
+    // Evaluate condition
+    evaluate(*i.getCondition());
+    LoxType condition = valueStack_.back();
+    valueStack_.pop_back();
+
+    if (isTruthy(condition)) {
+        execute(*i.getThenBranch());
+    } else if (i.getElseBranch()) {
+        execute(*i.getElseBranch());
+    }
+}
+
 bool Interpreter::isTruthy(const LoxType& t) {
     bool return_value;
 
@@ -320,6 +333,7 @@ void Interpreter::executeBlock(std::vector<std::unique_ptr<Statement>> &statemen
 
     environment_ = prior_environment;
 }
+
 
 
 

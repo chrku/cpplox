@@ -14,6 +14,7 @@ class ExpressionStatement;
 class PrintStatement;
 class VariableDeclaration;
 class Block;
+class IfStatement;
 
 class StatementVisitor {
 public:
@@ -21,6 +22,7 @@ public:
     virtual void visitPrintStatement(PrintStatement& p) = 0;
     virtual void visitVariableDeclaration(VariableDeclaration& v) = 0;
     virtual void visitBlock(Block& b) = 0;
+    virtual void visitIfStatement(IfStatement& i) = 0;
 
     virtual ~StatementVisitor() = default;
 };
@@ -111,6 +113,39 @@ public:
 
 private:
     std::vector<std::unique_ptr<Statement>> statements_;
+};
+
+class IfStatement : public Statement {
+public:
+    IfStatement(std::unique_ptr<Expression> condition,
+                std::unique_ptr<Statement> thenBranch,
+                std::unique_ptr<Statement> elseBranch)
+                : condition_(std::move(condition)),
+                  thenBranch_(std::move(thenBranch)),
+                  elseBranch_(std::move(elseBranch)) {}
+
+    ~IfStatement() override = default;
+
+    void accept(StatementVisitor& visitor) override {
+        visitor.visitIfStatement(*this);
+    }
+
+    [[nodiscard]] const std::unique_ptr<Expression>& getCondition() const {
+        return condition_;
+    }
+
+    [[nodiscard]] const std::unique_ptr<Statement>& getThenBranch() const {
+        return thenBranch_;
+    }
+
+    [[nodiscard]] const std::unique_ptr<Statement>& getElseBranch() const {
+        return elseBranch_;
+    }
+
+private:
+    std::unique_ptr<Expression> condition_;
+    std::unique_ptr<Statement> thenBranch_;
+    std::unique_ptr<Statement> elseBranch_;
 };
 
 #endif //LOX_STATEMENTS_H

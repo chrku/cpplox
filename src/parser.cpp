@@ -54,6 +54,9 @@ std::unique_ptr<Statement> Parser::varDeclaration() {
 }
 
 std::unique_ptr<Statement> Parser::statement() {
+    if (match({TokenType::IF})) {
+        return ifStatement();
+    }
     if (match({TokenType::PRINT})) {
         return printStatement();
     }
@@ -85,6 +88,20 @@ std::unique_ptr<Statement> Parser::printStatement() {
     std::unique_ptr<Expression> expr = expression();
     consume(TokenType::SEMICOLON, "Expect ';' after value.");
     return std::make_unique<PrintStatement>(std::move(expr));
+}
+
+std::unique_ptr<Statement> Parser::ifStatement() {
+    consume(TokenType::LEFT_PAREN, "Expect '(' after if.");
+    auto condition = expression();
+    consume(TokenType::RIGHT_PAREN, "Expect ')' after if condition");
+
+    auto thenBranch = statement();
+    std::unique_ptr<Statement> elseBranch{};
+    if (match({TokenType::ELSE})) {
+        elseBranch = statement();
+    }
+
+    return std::make_unique<IfStatement>(std::move(condition), std::move(thenBranch), std::move(elseBranch));
 }
 
 std::unique_ptr<Expression> Parser::expression() {
@@ -287,5 +304,6 @@ void Parser::synchronize() {
         advance();
     }
 }
+
 
 
