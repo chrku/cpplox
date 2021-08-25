@@ -12,6 +12,7 @@ class Literal;
 class Unary;
 class VariableAccess;
 class Assignment;
+class Logical;
 
 /*!
  * AST visitor interface
@@ -25,6 +26,7 @@ public:
     virtual void visitUnary(Unary& u) = 0;
     virtual void visitVariableAccess(VariableAccess& v) = 0;
     virtual void visitAssignment(Assignment& a) = 0;
+    virtual void visitLogical(Logical& l) = 0;
 
     virtual ~ExpressionVisitor() = default;
 };
@@ -223,8 +225,33 @@ private:
     std::unique_ptr<Expression> value_;
 };
 
-#include <memory>
-#include <utility>
-#include "token.h"
+class Logical : public Expression {
+public:
+    Logical(std::unique_ptr<Expression> left, const Token& token, std::unique_ptr<Expression> right)
+        : left_(std::move(left)), operator_(token), right_(std::move(right)) {}
+
+    ~Logical() override = default;
+
+    void accept(ExpressionVisitor& visitor) override {
+        return visitor.visitLogical(*this);
+    }
+
+    [[nodiscard]] const std::unique_ptr<Expression>& getLeft() const {
+        return left_;
+    }
+
+    [[nodiscard]] const Token& getOperator() const {
+        return operator_;
+    }
+
+    [[nodiscard]] const std::unique_ptr<Expression>& getRight() const {
+        return right_;
+    }
+
+private:
+    std::unique_ptr<Expression> left_;
+    Token operator_;
+    std::unique_ptr<Expression> right_;
+};
 
 #endif //LOX_EXPRESSIONS_H

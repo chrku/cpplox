@@ -173,6 +173,27 @@ void Interpreter::visitAssignment(Assignment& a) {
     environment_->assign(a.getName(), result_val);
 }
 
+void Interpreter::visitLogical(Logical& l) {
+    // Evaluate left first
+    evaluate(*l.getLeft());
+    LoxType left_val = valueStack_.back();
+    valueStack_.pop_back();
+
+    if (l.getOperator().getType() == TokenType::OR) {
+        if (isTruthy(left_val)) {
+            valueStack_.emplace_back(left_val);
+            return;
+        }
+    } else {
+        if (!isTruthy(left_val)) {
+            valueStack_.emplace_back(left_val);
+            return;
+        }
+    }
+
+    evaluate(*l.getRight());
+}
+
 void Interpreter::visitExpressionStatement(ExpressionStatement& s) {
     // Evaluate and discard
     evaluate(*s.getExpression());
@@ -333,6 +354,7 @@ void Interpreter::executeBlock(std::vector<std::unique_ptr<Statement>> &statemen
 
     environment_ = prior_environment;
 }
+
 
 
 

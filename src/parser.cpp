@@ -120,7 +120,7 @@ std::unique_ptr<Expression> Parser::comma() {
 }
 
 std::unique_ptr<Expression> Parser::assignment() {
-    auto left = equality();
+    auto left = logicOr();
 
     if (match({TokenType::EQUAL})) {
         const Token& equals = previous();
@@ -135,6 +135,30 @@ std::unique_ptr<Expression> Parser::assignment() {
         }
 
         error(equals, "Invalid assignment target, has to be lvalue.");
+    }
+
+    return left;
+}
+
+std::unique_ptr<Expression> Parser::logicOr() {
+    auto left = logicAnd();
+
+    while (match({TokenType::OR})) {
+        auto op = previous();
+        auto right = logicAnd();
+        left = std::make_unique<Logical>(std::move(left), op, std::move(right));
+    }
+
+    return left;
+}
+
+std::unique_ptr<Expression> Parser::logicAnd() {
+    auto left = equality();
+
+    while (match({TokenType::AND})) {
+        auto op = previous();
+        auto right = equality();
+        left = std::make_unique<Logical>(std::move(left), op, std::move(right));
     }
 
     return left;

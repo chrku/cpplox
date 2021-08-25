@@ -77,6 +77,7 @@ private:
     void visitUnary(Unary &u) override;
     void visitVariableAccess(VariableAccess& v) override;
     void visitAssignment(Assignment& a) override;
+    void visitLogical(Logical& l) override;
 
     void visitExpressionStatement(ExpressionStatement& s) override;
     void visitPrintStatement(PrintStatement& p) override;
