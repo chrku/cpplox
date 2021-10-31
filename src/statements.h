@@ -15,6 +15,7 @@ class PrintStatement;
 class VariableDeclaration;
 class Block;
 class IfStatement;
+class WhileStatement;
 
 class StatementVisitor {
 public:
@@ -23,6 +24,7 @@ public:
     virtual void visitVariableDeclaration(VariableDeclaration& v) = 0;
     virtual void visitBlock(Block& b) = 0;
     virtual void visitIfStatement(IfStatement& i) = 0;
+    virtual void visitWhileStatement(WhileStatement& w) = 0;
 
     virtual ~StatementVisitor() = default;
 };
@@ -146,6 +148,32 @@ private:
     std::unique_ptr<Expression> condition_;
     std::unique_ptr<Statement> thenBranch_;
     std::unique_ptr<Statement> elseBranch_;
+};
+
+class WhileStatement : public Statement {
+public:
+    WhileStatement(std::unique_ptr<Expression> condition,
+                   std::unique_ptr<Statement> thenBranch)
+                   : condition_(std::move(condition)),
+                   thenBranch_(std::move(thenBranch)) {}
+
+   ~WhileStatement() override = default;
+
+    void accept(StatementVisitor& visitor) override {
+        visitor.visitWhileStatement(*this);
+    }
+
+    [[nodiscard]] const std::unique_ptr<Expression> &getCondition() const {
+        return condition_;
+    }
+
+    [[nodiscard]] const std::unique_ptr<Statement> &getThenBranch() const {
+        return thenBranch_;
+    }
+
+private:
+    std::unique_ptr<Expression> condition_;
+    std::unique_ptr<Statement> thenBranch_;
 };
 
 #endif //LOX_STATEMENTS_H

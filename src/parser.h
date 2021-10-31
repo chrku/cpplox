@@ -66,6 +66,7 @@ private:
     std::vector<std::unique_ptr<Statement>> block();
     std::unique_ptr<Statement> printStatement();
     std::unique_ptr<Statement> ifStatement();
+    std::unique_ptr<Statement> whileStatement();
 
     // Expressions
     std::unique_ptr<Expression> expression();

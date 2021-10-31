@@ -240,6 +240,20 @@ void Interpreter::visitIfStatement(IfStatement& i) {
     }
 }
 
+void Interpreter::visitWhileStatement(WhileStatement &w) {
+    // Evaluate condition
+    evaluate(*w.getCondition());
+    LoxType condition = valueStack_.back();
+    valueStack_.pop_back();
+
+    while (isTruthy(condition)) {
+        execute(*w.getThenBranch());
+        evaluate(*w.getCondition());
+        condition = valueStack_.back();
+        valueStack_.pop_back();
+    }
+}
+
 bool Interpreter::isTruthy(const LoxType& t) {
     bool return_value;
 
@@ -354,6 +368,7 @@ void Interpreter::executeBlock(std::vector<std::unique_ptr<Statement>> &statemen
 
     environment_ = prior_environment;
 }
+
 
 
 
