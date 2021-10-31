@@ -16,6 +16,7 @@ class VariableDeclaration;
 class Block;
 class IfStatement;
 class WhileStatement;
+class BreakStatement;
 
 class StatementVisitor {
 public:
@@ -25,6 +26,7 @@ public:
     virtual void visitBlock(Block& b) = 0;
     virtual void visitIfStatement(IfStatement& i) = 0;
     virtual void visitWhileStatement(WhileStatement& w) = 0;
+    virtual void visitBreakStatement(BreakStatement& b) = 0;
 
     virtual ~StatementVisitor() = default;
 };
@@ -174,6 +176,17 @@ public:
 private:
     std::unique_ptr<Expression> condition_;
     std::unique_ptr<Statement> thenBranch_;
+};
+
+class BreakStatement : public Statement {
+public:
+    BreakStatement() {}
+
+    ~BreakStatement() override = default;
+
+    void accept(StatementVisitor& visitor) override {
+        visitor.visitBreakStatement(*this);
+    }
 };
 
 #endif //LOX_STATEMENTS_H

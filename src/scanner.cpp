@@ -20,7 +20,8 @@ const std::map<std::string, TokenType> Scanner::keywords_ = {
         {"this", TokenType::THIS},
         {"true", TokenType::TRUE},
         {"var", TokenType::VAR},
-        {"while", TokenType::WHILE}
+        {"while", TokenType::WHILE},
+        {"break", TokenType::BREAK}
 };
 
 Scanner::Scanner(std::unique_ptr<std::string> source, std::shared_ptr<LoxInterpreter> loxInterpreter)

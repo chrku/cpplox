@@ -85,7 +85,7 @@ void LoxInterpreter::error(int line, std::string_view message) {
 
 void LoxInterpreter::reportError(int line, std::string_view where, std::string_view message) {
     if (!silentParseErrors_) {
-        std::cout << "[line " << line << "] Error" << where << ": " << message << std::endl;
+        std::cout << "[line " << line << "] Error " << where << ": " << message << std::endl;
     }
     hadError_ = true;
 }

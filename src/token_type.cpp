@@ -120,6 +120,9 @@ std::ostream& operator<<(std::ostream& os, TokenType t) {
         case TokenType::WHILE:
             os << "WHILE";
             break;
+        case TokenType::BREAK:
+            os << "BREAK";
+            break;
         case TokenType::EOF_TYPE:
             os << "EOF_TYPE";
             break;

@@ -246,12 +246,19 @@ void Interpreter::visitWhileStatement(WhileStatement &w) {
     LoxType condition = valueStack_.back();
     valueStack_.pop_back();
 
-    while (isTruthy(condition)) {
-        execute(*w.getThenBranch());
-        evaluate(*w.getCondition());
-        condition = valueStack_.back();
-        valueStack_.pop_back();
+    try {
+        while (isTruthy(condition)) {
+            execute(*w.getThenBranch());
+            evaluate(*w.getCondition());
+            condition = valueStack_.back();
+            valueStack_.pop_back();
+        }
+    } catch (const BreakException& b) {
     }
+}
+
+void Interpreter::visitBreakStatement(BreakStatement &b) {
+    throw BreakException{};
 }
 
 bool Interpreter::isTruthy(const LoxType& t) {

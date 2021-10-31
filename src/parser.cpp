@@ -63,6 +63,9 @@ std::unique_ptr<Statement> Parser::statement() {
     if (match({TokenType::FOR})) {
         return forStatement();
     }
+    if (match({TokenType::BREAK})) {
+        return breakStatement();
+    }
     if (match({TokenType::PRINT})) {
         return printStatement();
     }
@@ -116,7 +119,9 @@ std::unique_ptr<Statement> Parser::whileStatement() {
     auto condition = expression();
     consume(TokenType::RIGHT_PAREN, "Expect ')' after if condition");
 
+    openLoop();
     auto thenBranch = statement();
+    closeLoop();
 
     return std::make_unique<WhileStatement>(std::move(condition), std::move(thenBranch));
 }
@@ -149,7 +154,9 @@ std::unique_ptr<Statement> Parser::forStatement() {
     consume(TokenType::RIGHT_PAREN, "Expect ')' after for clauses.");
 
     // Parse body
+    openLoop();
     std::unique_ptr<Statement> body = statement();
+    closeLoop();
 
     // Desugaring
     std::vector<std::unique_ptr<Statement>> statements;
@@ -175,6 +182,14 @@ std::unique_ptr<Statement> Parser::forStatement() {
     }
 
     return body;
+}
+
+std::unique_ptr<Statement> Parser::breakStatement() {
+    if (!isInLoop()) {
+        throw error(previous(), "Can only use break within loop");
+    }
+    consume(TokenType::SEMICOLON, "Expect ';' after break.");
+    return std::make_unique<BreakStatement>();
 }
 
 std::unique_ptr<Expression> Parser::expression() {
@@ -401,6 +416,19 @@ void Parser::synchronize() {
         advance();
     }
 }
+
+bool Parser::isInLoop() const {
+    return numLoops_ > 0;
+}
+
+void Parser::openLoop() {
+    numLoops_++;
+}
+
+void Parser::closeLoop() {
+    numLoops_--;
+}
+
 
 
 

@@ -37,6 +37,11 @@ private:
     Token token_;
 };
 
+class BreakException : public std::exception {
+public:
+    BreakException() = default;
+};
+
 class Interpreter : public ExpressionVisitor, public StatementVisitor {
 public:
     /*!
@@ -85,6 +90,7 @@ private:
     void visitBlock(Block& b) override;
     void visitIfStatement(IfStatement& i) override;
     void visitWhileStatement(WhileStatement& w) override;
+    void visitBreakStatement(BreakStatement& b) override;
 
     [[nodiscard]] static bool isTruthy(const LoxType& t);
     [[nodiscard]] static double negate(const Token& op, const LoxType& t);

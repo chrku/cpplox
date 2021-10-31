@@ -57,6 +57,9 @@ private:
     // Position in token stream
     int current_ = 0;
 
+    // Number of loops currently enclosing position
+    int numLoops_ = 0;
+
     // Parsing routines for different grammar rules
     // Statements
     std::unique_ptr<Statement> declaration();
@@ -68,6 +71,7 @@ private:
     std::unique_ptr<Statement> ifStatement();
     std::unique_ptr<Statement> whileStatement();
     std::unique_ptr<Statement> forStatement();
+    std::unique_ptr<Statement> breakStatement();
 
     // Expressions
     std::unique_ptr<Expression> expression();
@@ -90,6 +94,9 @@ private:
     [[nodiscard]] bool isAtEnd() const;
     [[nodiscard]] const Token& peek() const;
     [[nodiscard]] const Token& previous() const;
+    [[nodiscard]] bool isInLoop() const;
+    void openLoop();
+    void closeLoop();
 
     // Error reporting and recovery
     const Token& consume(TokenType type, std::string_view message);
