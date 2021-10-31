@@ -163,11 +163,11 @@ public:
         visitor.visitWhileStatement(*this);
     }
 
-    [[nodiscard]] const std::unique_ptr<Expression> &getCondition() const {
+    [[nodiscard]] const std::unique_ptr<Expression>& getCondition() const {
         return condition_;
     }
 
-    [[nodiscard]] const std::unique_ptr<Statement> &getThenBranch() const {
+    [[nodiscard]] const std::unique_ptr<Statement>& getThenBranch() const {
         return thenBranch_;
     }
 

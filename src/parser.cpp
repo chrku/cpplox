@@ -60,6 +60,9 @@ std::unique_ptr<Statement> Parser::statement() {
     if (match({TokenType::WHILE})) {
         return whileStatement();
     }
+    if (match({TokenType::FOR})) {
+        return forStatement();
+    }
     if (match({TokenType::PRINT})) {
         return printStatement();
     }
@@ -116,6 +119,62 @@ std::unique_ptr<Statement> Parser::whileStatement() {
     auto thenBranch = statement();
 
     return std::make_unique<WhileStatement>(std::move(condition), std::move(thenBranch));
+}
+
+std::unique_ptr<Statement> Parser::forStatement() {
+    consume(TokenType::LEFT_PAREN, "Expect '(' after for.");
+
+    // Parse initializer
+    std::unique_ptr<Statement> initializer{};
+    if (match({TokenType::SEMICOLON})) {
+        initializer = nullptr;
+    } else if (match({TokenType::VAR})) {
+        initializer = varDeclaration();
+    } else {
+        initializer = expressionStatement();
+    }
+
+    // Parse condition
+    std::unique_ptr<Expression> condition{};
+    if (!check(TokenType::SEMICOLON)) {
+        condition = expression();
+    }
+    consume(TokenType::SEMICOLON, "Expect ';' after loop condition.");
+
+    // Parse increment
+    std::unique_ptr<Expression> increment{};
+    if (!check(TokenType::RIGHT_PAREN)) {
+        increment = expression();
+    }
+    consume(TokenType::RIGHT_PAREN, "Expect ')' after for clauses.");
+
+    // Parse body
+    std::unique_ptr<Statement> body = statement();
+
+    // Desugaring
+    std::vector<std::unique_ptr<Statement>> statements;
+    statements.push_back(std::move(body));
+
+    // Add increment if available
+    if (increment) {
+        statements.push_back(std::make_unique<ExpressionStatement>(std::move(increment)));
+    }
+    body = std::make_unique<Block>(std::move(statements));
+
+    // Add condition
+    if (condition) {
+        body = std::make_unique<WhileStatement>(std::move(condition), std::move(body));
+    }
+
+    // Add initializer
+    if (initializer) {
+        statements.clear();
+        statements.push_back(std::move(initializer));
+        statements.push_back(std::move(body));
+        body = std::make_unique<Block>(std::move(statements));
+    }
+
+    return body;
 }
 
 std::unique_ptr<Expression> Parser::expression() {
@@ -342,6 +401,7 @@ void Parser::synchronize() {
         advance();
     }
 }
+
 
 
 
