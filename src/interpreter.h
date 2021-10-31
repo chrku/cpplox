@@ -74,6 +74,7 @@ public:
 private:
     std::vector<LoxType> valueStack_;
     std::shared_ptr<Environment> environment_;
+    std::shared_ptr<Environment> globals_;
 
     void visitBinary(Binary &b) override;
     void visitTernary(Ternary &t) override;
@@ -83,6 +84,7 @@ private:
     void visitVariableAccess(VariableAccess& v) override;
     void visitAssignment(Assignment& a) override;
     void visitLogical(Logical& l) override;
+    void visitCall(Call& c) override;
 
     void visitExpressionStatement(ExpressionStatement& s) override;
     void visitPrintStatement(PrintStatement& p) override;

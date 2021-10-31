@@ -4,11 +4,10 @@
 
 #include "interpreter.h"
 
-#include "utils.h"
 #include "lox.h"
+#include "native_functions/clock.h"
 
 #include <iostream>
-#include <utility>
 
 RuntimeError::RuntimeError(Token t, const std::string &message) : std::runtime_error(message), token_(std::move(t)) {
 }
@@ -17,7 +16,10 @@ const Token& RuntimeError::getToken() const {
     return token_;
 }
 
-Interpreter::Interpreter() : valueStack_{}, environment_{std::make_shared<Environment>()} {
+Interpreter::Interpreter() : valueStack_{}, environment_{nullptr}, globals_{std::make_shared<Environment>()} {
+    environment_ = globals_;
+    globals_->define("clock",
+                     std::make_shared<Clock>());
 }
 
 void Interpreter::interpret(std::vector<std::unique_ptr<Statement>>& program,
@@ -194,6 +196,35 @@ void Interpreter::visitLogical(Logical& l) {
     evaluate(*l.getRight());
 }
 
+void Interpreter::visitCall(Call &c) {
+    evaluate(*c.getCallee());
+    LoxType left_val = valueStack_.back();
+    valueStack_.pop_back();
+
+    if (std::holds_alternative<std::shared_ptr<Callable>>(left_val)) {
+        auto& callable = std::get<std::shared_ptr<Callable>>(left_val);
+
+        std::vector<LoxType> arguments;
+        for (auto& argument : c.getArguments()) {
+            evaluate(*argument);
+            LoxType result = valueStack_.back();
+            valueStack_.pop_back();
+            arguments.push_back(result);
+        }
+
+        if (arguments.size() == callable->arity()) {
+            LoxType ret_val = callable->call(*this, arguments);
+            valueStack_.push_back(ret_val);
+        } else {
+            throw RuntimeError(c.getParen(), "Expected " +
+                                             std::to_string(callable->arity()) + " arguments but got " +
+                                             std::to_string(arguments.size()) + ".");
+        }
+    } else {
+        throw RuntimeError(c.getParen(), "Can only call functions and classes.");
+    }
+}
+
 void Interpreter::visitExpressionStatement(ExpressionStatement& s) {
     // Evaluate and discard
     evaluate(*s.getExpression());
@@ -276,6 +307,9 @@ bool Interpreter::isTruthy(const LoxType& t) {
             },
             [&](bool b) {
                 return_value = b;
+            },
+            [&](const std::shared_ptr<Callable>& c) {
+                return_value = true;
             }
     }, t);
 
@@ -297,6 +331,9 @@ double Interpreter::negate(const Token& op, const LoxType &t) {
             },
             [&](bool b) {
                 return_value = -static_cast<double>(b);
+            },
+            [&](const std::shared_ptr<Callable>& c) {
+                throw RuntimeError(op, "Cannot negate callable.");
             }
     }, t);
 
@@ -318,6 +355,9 @@ double Interpreter::toDouble(const LoxType &t) {
             },
             [&](bool b) {
                 return_value = static_cast<double>(b);
+            },
+            [&](const std::shared_ptr<Callable>& c) {
+                return_value = std::numeric_limits<double>::quiet_NaN();
             }
     }, t);
 
@@ -338,12 +378,19 @@ bool Interpreter::isEqual(const LoxType& t1, const LoxType& t2) {
                 }
             },
             [&](const NullType& n) {
-                if (std::holds_alternative<NullType>(t2)){
+                if (std::holds_alternative<NullType>(t2)) {
                     return_value = true;
                 }
             },
             [&](bool b) {
                 return_value = b == isTruthy(t2);
+            },
+            [&](const std::shared_ptr<Callable>& c) {
+                if (std::holds_alternative<std::shared_ptr<Callable>>(t2)) {
+                    const auto& c1 = std::get<std::shared_ptr<Callable>>(t2);
+                    return_value = c == c1;
+                }
+                return_value = false;
             }
     }, t1);
 
@@ -375,6 +422,7 @@ void Interpreter::executeBlock(std::vector<std::unique_ptr<Statement>> &statemen
 
     environment_ = prior_environment;
 }
+
 
 
 

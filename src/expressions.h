@@ -5,6 +5,8 @@
 #ifndef LOX_EXPRESSIONS_H
 #define LOX_EXPRESSIONS_H
 
+#include <vector>
+
 class Binary;
 class Ternary;
 class Grouping;
@@ -13,6 +15,7 @@ class Unary;
 class VariableAccess;
 class Assignment;
 class Logical;
+class Call;
 
 /*!
  * AST visitor interface
@@ -27,6 +30,7 @@ public:
     virtual void visitVariableAccess(VariableAccess& v) = 0;
     virtual void visitAssignment(Assignment& a) = 0;
     virtual void visitLogical(Logical& l) = 0;
+    virtual void visitCall(Call& c) = 0;
 
     virtual ~ExpressionVisitor() = default;
 };
@@ -252,6 +256,35 @@ private:
     std::unique_ptr<Expression> left_;
     Token operator_;
     std::unique_ptr<Expression> right_;
+};
+
+class Call : public Expression {
+public:
+    Call(std::unique_ptr<Expression> callee, const Token& paren, std::vector<std::unique_ptr<Expression>>&& arguments)
+        : callee_(std::move(callee)), paren_(paren), arguments_(std::move(arguments)) {}
+
+    ~Call() override = default;
+
+    void accept(ExpressionVisitor& visitor) override {
+        return visitor.visitCall(*this);
+    }
+
+    [[nodiscard]] const std::unique_ptr<Expression> &getCallee() const {
+        return callee_;
+    }
+
+    [[nodiscard]] const Token &getParen() const {
+        return paren_;
+    }
+
+    [[nodiscard]] const std::vector<std::unique_ptr<Expression>> &getArguments() const {
+        return arguments_;
+    }
+
+private:
+    std::unique_ptr<Expression> callee_;
+    Token paren_;
+    std::vector<std::unique_ptr<Expression>> arguments_;
 };
 
 #endif //LOX_EXPRESSIONS_H

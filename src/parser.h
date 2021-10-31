@@ -85,6 +85,7 @@ private:
     std::unique_ptr<Expression> term();
     std::unique_ptr<Expression> factor();
     std::unique_ptr<Expression> unary();
+    std::unique_ptr<Expression> call();
     std::unique_ptr<Expression> primary();
 
     // Matching and handling of tokens
@@ -97,6 +98,9 @@ private:
     [[nodiscard]] bool isInLoop() const;
     void openLoop();
     void closeLoop();
+
+    // Handling of function calls
+    std::unique_ptr<Expression> finishCall(std::unique_ptr<Expression> callee);
 
     // Error reporting and recovery
     const Token& consume(TokenType type, std::string_view message);
