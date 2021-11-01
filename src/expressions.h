@@ -7,6 +7,7 @@
 
 #include <vector>
 
+
 class Binary;
 class Ternary;
 class Grouping;
@@ -16,6 +17,9 @@ class VariableAccess;
 class Assignment;
 class Logical;
 class Call;
+class FunctionExpression;
+
+class Statement;
 
 /*!
  * AST visitor interface
@@ -31,6 +35,7 @@ public:
     virtual void visitAssignment(Assignment& a) = 0;
     virtual void visitLogical(Logical& l) = 0;
     virtual void visitCall(Call& c) = 0;
+    virtual void visitFunctionExpression(FunctionExpression& f) = 0;
 
     virtual ~ExpressionVisitor() = default;
 };
@@ -285,6 +290,30 @@ private:
     std::unique_ptr<Expression> callee_;
     Token paren_;
     std::vector<std::unique_ptr<Expression>> arguments_;
+};
+
+class FunctionExpression : public Expression {
+public:
+    FunctionExpression(const std::vector<Token>& arguments, std::vector<std::shared_ptr<Statement>>  statements)
+        : params_(arguments), body_(std::move(statements)) {}
+
+    ~FunctionExpression() override = default;
+
+    void accept(ExpressionVisitor& visitor) override {
+        return visitor.visitFunctionExpression(*this);
+    }
+
+    [[nodiscard]] const std::vector<Token>& getParams() const {
+        return params_;
+    }
+
+    [[nodiscard]] const std::vector<std::shared_ptr<Statement>>& getBody() const {
+        return body_;
+    }
+
+private:
+    std::vector<Token> params_;
+    std::vector<std::shared_ptr<Statement>> body_;
 };
 
 #endif //LOX_EXPRESSIONS_H

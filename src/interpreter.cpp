@@ -225,6 +225,11 @@ void Interpreter::visitCall(Call &c) {
     }
 }
 
+void Interpreter::visitFunctionExpression(FunctionExpression& f) {
+    std::shared_ptr<LoxFunction> l = std::make_shared<LoxFunction>(f, getEnvironment());
+    valueStack_.emplace_back(l);
+}
+
 void Interpreter::visitExpressionStatement(ExpressionStatement& s) {
     // Evaluate and discard
     evaluate(*s.getExpression());
@@ -293,7 +298,7 @@ void Interpreter::visitBreakStatement(BreakStatement &b) {
 }
 
 void Interpreter::visitFunction(Function& f) {
-    std::shared_ptr<LoxFunction> function = std::make_shared<LoxFunction>(f);
+    std::shared_ptr<LoxFunction> function = std::make_shared<LoxFunction>(f, environment_);
     environment_->define(f.getName().getLexeme(), function);
 }
 

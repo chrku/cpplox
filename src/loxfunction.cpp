@@ -3,18 +3,21 @@
 //
 
 #include "loxfunction.h"
-#include "environment.h"
 #include "interpreter.h"
 
-#include <utility>
 
-LoxFunction::LoxFunction(const Function& function)
-    : statements_(function.getBody()), params_(function.getParams())
+LoxFunction::LoxFunction(const Function& function, std::shared_ptr<Environment> closure)
+    : statements_(function.getBody()), params_(function.getParams()), closure_(std::move(closure))
+{}
+
+
+LoxFunction::LoxFunction(const FunctionExpression &function, std::shared_ptr<Environment> closure)
+    : statements_(function.getBody()), params_(function.getParams()), closure_(std::move(closure))
 {}
 
 LoxType LoxFunction::call(Interpreter& interpreter, std::vector<LoxType>& arguments) {
     std::shared_ptr<Environment> environment = std::make_shared<Environment>();
-    environment->setEnclosing(interpreter.getEnvironment());
+    environment->setEnclosing(closure_);
 
     for (int i = 0; i < params_.size(); ++i) {
         environment->define(params_[i].getLexeme(), arguments[i]);

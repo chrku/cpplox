@@ -93,16 +93,21 @@ private:
     // Matching and handling of tokens
     bool match(std::initializer_list<TokenType> types);
     [[nodiscard]] bool check(TokenType type) const;
+    [[nodiscard]] bool checkNext(TokenType type) const;
     const Token& advance();
     [[nodiscard]] bool isAtEnd() const;
     [[nodiscard]] const Token& peek() const;
     [[nodiscard]] const Token& previous() const;
+    [[nodiscard]] const Token& next() const;
     [[nodiscard]] bool isInLoop() const;
     void openLoop();
     void closeLoop();
 
     // Handling of function calls
     std::unique_ptr<Expression> finishCall(std::unique_ptr<Expression> callee);
+
+    // Handling of function expressions
+    std::unique_ptr<Expression> handleFunctionExpression();
 
     // Error reporting and recovery
     const Token& consume(TokenType type, std::string_view message);

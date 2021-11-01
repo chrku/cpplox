@@ -8,10 +8,13 @@
 #include "types.h"
 #include "statements.h"
 #include "token.h"
+#include "environment.h"
 
 class LoxFunction : public Callable {
 public:
-    LoxFunction(const Function& function);
+    LoxFunction(const Function& function, std::shared_ptr<Environment> closure);
+
+    LoxFunction(const FunctionExpression& function, std::shared_ptr<Environment> closure);
 
     LoxType call(Interpreter &interpreter, std::vector<LoxType> &arguments) override;
 
@@ -21,6 +24,7 @@ public:
 private:
     std::vector<std::shared_ptr<Statement>> statements_;
     std::vector<Token> params_;
+    std::shared_ptr<Environment> closure_;
 };
 
 

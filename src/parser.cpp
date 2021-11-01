@@ -33,7 +33,10 @@ void Parser::reset() {
 
 std::shared_ptr<Statement> Parser::declaration() {
     try {
-        if (match({TokenType::FUN})) { return function("function"); }
+        if (check(TokenType::FUN) && checkNext(TokenType::IDENTIFIER)) {
+            advance();
+            return function("function");
+        }
         if (match({TokenType::VAR})) { return varDeclaration(); }
         return statement();
     } catch (const ParseError& e) {
@@ -380,6 +383,7 @@ std::unique_ptr<Expression> Parser::primary() {
     if (match({TokenType::FALSE})) { return std::make_unique<Literal>(false); }
     if (match({TokenType::TRUE})) { return std::make_unique<Literal>(true); }
     if (match({TokenType::NIL})) { return std::make_unique<Literal>(); }
+    if (match({TokenType::FUN})) { return handleFunctionExpression(); }
 
     if (match({TokenType::NUMBER, TokenType::STRING})) {
         std::unique_ptr<Literal> literal;
@@ -421,6 +425,12 @@ bool Parser::check(TokenType type) const {
     return peek().getType() == type;
 }
 
+bool Parser::checkNext(TokenType type) const {
+    if (isAtEnd()) { return false; }
+    if (next().getType() == type) { return true;}
+    return false;
+}
+
 const Token& Parser::advance() {
     if (!isAtEnd()) { current_++; }
     return previous();
@@ -436,6 +446,10 @@ const Token& Parser::peek() const {
 
 const Token& Parser::previous() const {
     return tokens_->at(current_ - 1);
+}
+
+const Token& Parser::next() const {
+    return tokens_->at(current_ + 1);
 }
 
 const Token& Parser::consume(TokenType type, std::string_view message) {
@@ -499,4 +513,26 @@ std::unique_ptr<Expression> Parser::finishCall(std::unique_ptr<Expression> calle
 
     return std::make_unique<Call>(std::move(callee), paren, std::move(arguments));
 }
+
+std::unique_ptr<Expression> Parser::handleFunctionExpression() {
+    std::vector<Token> params;
+
+    consume(TokenType::LEFT_PAREN, "Expect '(' after anonymous function declaration.");
+    if (!check(TokenType::RIGHT_PAREN)) {
+        do {
+            if (params.size() >= 255) {
+                error(peek(), "Can't have more than 255 parameters");
+            }
+
+            params.push_back(consume(TokenType::IDENTIFIER, "Expect parameter name"));
+        } while (match({TokenType::COMMA}));
+    }
+    consume(TokenType::RIGHT_PAREN, "Expect ')' after parameters");
+    consume(TokenType::LEFT_BRACE, "Expect '{' before function body.");
+
+    auto body = block();
+
+    return std::make_unique<FunctionExpression>(params, body);
+}
+
 
