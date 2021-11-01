@@ -38,7 +38,7 @@ public:
      * Parse a lox program
      * @return List of lox statements constituting program
      */
-    std::vector<std::unique_ptr<Statement>> parse();
+    std::vector<std::shared_ptr<Statement>> parse();
 
     /*!
      * Parse an expression
@@ -62,11 +62,12 @@ private:
 
     // Parsing routines for different grammar rules
     // Statements
-    std::unique_ptr<Statement> declaration();
+    std::shared_ptr<Statement> declaration();
     std::unique_ptr<Statement> varDeclaration();
     std::unique_ptr<Statement> statement();
     std::unique_ptr<Statement> expressionStatement();
-    std::vector<std::unique_ptr<Statement>> block();
+    std::shared_ptr<Statement> function(const std::string& kind);
+    std::vector<std::shared_ptr<Statement>> block();
     std::unique_ptr<Statement> printStatement();
     std::unique_ptr<Statement> ifStatement();
     std::unique_ptr<Statement> whileStatement();
@@ -74,9 +75,9 @@ private:
     std::unique_ptr<Statement> breakStatement();
 
     // Expressions
-    std::unique_ptr<Expression> expression();
+    std::unique_ptr<Expression> expression(bool disable_comma=false);
     std::unique_ptr<Expression> assignment();
-    std::unique_ptr<Expression> comma();
+    std::unique_ptr<Expression> comma(bool disable_comma);
     std::unique_ptr<Expression> logicOr();
     std::unique_ptr<Expression> logicAnd();
     std::unique_ptr<Expression> equality();

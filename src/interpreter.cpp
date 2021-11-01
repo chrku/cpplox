@@ -5,6 +5,7 @@
 #include "interpreter.h"
 
 #include "lox.h"
+#include "loxfunction.h"
 #include "native_functions/clock.h"
 
 #include <iostream>
@@ -16,16 +17,15 @@ const Token& RuntimeError::getToken() const {
     return token_;
 }
 
-Interpreter::Interpreter() : valueStack_{}, environment_{nullptr}, globals_{std::make_shared<Environment>()} {
-    environment_ = globals_;
-    globals_->define("clock",
+Interpreter::Interpreter() : valueStack_{}, environment_{std::make_shared<Environment>()} {
+    environment_->define("clock",
                      std::make_shared<Clock>());
 }
 
-void Interpreter::interpret(std::vector<std::unique_ptr<Statement>>& program,
+void Interpreter::interpret(std::vector<std::shared_ptr<Statement>>& program,
                             const std::shared_ptr<LoxInterpreter>& context) {
     try {
-        for (std::unique_ptr<Statement>& stmt : program) {
+        for (std::shared_ptr<Statement>& stmt : program) {
             execute(*stmt);
         }
     } catch (const RuntimeError& error) {
@@ -292,6 +292,11 @@ void Interpreter::visitBreakStatement(BreakStatement &b) {
     throw BreakException{};
 }
 
+void Interpreter::visitFunction(Function& f) {
+    std::shared_ptr<LoxFunction> function = std::make_shared<LoxFunction>(f);
+    environment_->define(f.getName().getLexeme(), function);
+}
+
 bool Interpreter::isTruthy(const LoxType& t) {
     bool return_value;
 
@@ -405,14 +410,14 @@ void Interpreter::checkNumberOperands(const Token& op, const LoxType& t1, const 
     throw RuntimeError(op, "Operands must be numbers");
 }
 
-void Interpreter::executeBlock(std::vector<std::unique_ptr<Statement>> &statements,
+void Interpreter::executeBlock(const std::vector<std::shared_ptr<Statement>>& statements,
                                std::shared_ptr<Environment> new_environment) {
     // Create a pointer to restore environment in case of error
     std::shared_ptr<Environment> prior_environment = environment_;
     try {
         environment_ = std::move(new_environment);
 
-        for (auto& statement : statements) {
+        for (const auto& statement : statements) {
             execute(*statement);
         }
     } catch(...) {
@@ -422,6 +427,11 @@ void Interpreter::executeBlock(std::vector<std::unique_ptr<Statement>> &statemen
 
     environment_ = prior_environment;
 }
+
+const std::shared_ptr<Environment>& Interpreter::getEnvironment() const {
+    return environment_;
+}
+
 
 
 

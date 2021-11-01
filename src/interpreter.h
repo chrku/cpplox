@@ -54,7 +54,7 @@ public:
      * @param program sequence of statements
      * @param context interpreter context for error reporting
      */
-    void interpret(std::vector<std::unique_ptr<Statement>>& program,
+    void interpret(std::vector<std::shared_ptr<Statement>>& program,
                    const std::shared_ptr<LoxInterpreter>& context);
 
     /*!
@@ -71,10 +71,14 @@ public:
     void execute(Statement& statement);
 
     ~Interpreter() override = default;
+
+    [[nodiscard]] const std::shared_ptr<Environment>& getEnvironment() const;
+
+    void executeBlock(const std::vector<std::shared_ptr<Statement>>& statements,
+                      std::shared_ptr<Environment> new_environment);
 private:
     std::vector<LoxType> valueStack_;
     std::shared_ptr<Environment> environment_;
-    std::shared_ptr<Environment> globals_;
 
     void visitBinary(Binary &b) override;
     void visitTernary(Ternary &t) override;
@@ -93,6 +97,7 @@ private:
     void visitIfStatement(IfStatement& i) override;
     void visitWhileStatement(WhileStatement& w) override;
     void visitBreakStatement(BreakStatement& b) override;
+    void visitFunction(Function& f) override;
 
     [[nodiscard]] static bool isTruthy(const LoxType& t);
     [[nodiscard]] static double negate(const Token& op, const LoxType& t);
@@ -100,8 +105,6 @@ private:
     [[nodiscard]] static bool isEqual(const LoxType& t1, const LoxType& t2);
 
     static void checkNumberOperands(const Token& op, const LoxType& t1, const LoxType& t2);
-    void executeBlock(std::vector<std::unique_ptr<Statement>>& statements,
-                      std::shared_ptr<Environment> new_environment);
 };
 
 

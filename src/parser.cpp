@@ -9,8 +9,8 @@
 Parser::Parser(std::shared_ptr<std::vector<Token>> tokens, std::shared_ptr<LoxInterpreter> interpreter)
     : tokens_(std::move(tokens)), interpreter_(std::move(interpreter)) {}
 
-std::vector<std::unique_ptr<Statement>> Parser::parse() {
-    std::vector<std::unique_ptr<Statement>> statements{};
+std::vector<std::shared_ptr<Statement>> Parser::parse() {
+    std::vector<std::shared_ptr<Statement>> statements{};
 
     while (!isAtEnd()) {
         statements.push_back(declaration());
@@ -31,8 +31,9 @@ void Parser::reset() {
     current_ = 0;
 }
 
-std::unique_ptr<Statement> Parser::declaration() {
+std::shared_ptr<Statement> Parser::declaration() {
     try {
+        if (match({TokenType::FUN})) { return function("function"); }
         if (match({TokenType::VAR})) { return varDeclaration(); }
         return statement();
     } catch (const ParseError& e) {
@@ -70,7 +71,8 @@ std::unique_ptr<Statement> Parser::statement() {
         return printStatement();
     }
     if (match({TokenType::LEFT_BRACE})) {
-        return std::make_unique<Block>(block());
+        auto statements = block();
+        return std::make_unique<Block>(statements);
     }
 
     return expressionStatement();
@@ -82,8 +84,30 @@ std::unique_ptr<Statement> Parser::expressionStatement() {
     return std::make_unique<ExpressionStatement>(std::move(expr));
 }
 
-std::vector<std::unique_ptr<Statement>> Parser::block() {
-    std::vector<std::unique_ptr<Statement>> statements;
+std::shared_ptr<Statement> Parser::function(const std::string& kind) {
+    Token name = consume(TokenType::IDENTIFIER, "Expect " + kind + " name.");
+    std::vector<Token> params;
+
+    consume(TokenType::LEFT_PAREN, "Expect '(' after " + kind + " name.");
+    if (!check(TokenType::RIGHT_PAREN)) {
+        do {
+            if (params.size() >= 255) {
+                error(peek(), "Can't have more than 255 parameters");
+            }
+
+            params.push_back(consume(TokenType::IDENTIFIER, "Expect parameter name"));
+        } while (match({TokenType::COMMA}));
+    }
+    consume(TokenType::RIGHT_PAREN, "Expect ')' after parameters");
+    consume(TokenType::LEFT_BRACE, "Expect '{' before " + kind + " body.");
+
+    auto body = block();
+
+    return std::make_unique<Function>(name, params, body);
+}
+
+std::vector<std::shared_ptr<Statement>> Parser::block() {
+    std::vector<std::shared_ptr<Statement>> statements;
 
     while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
         statements.push_back(declaration());
@@ -159,14 +183,14 @@ std::unique_ptr<Statement> Parser::forStatement() {
     closeLoop();
 
     // Desugaring
-    std::vector<std::unique_ptr<Statement>> statements;
+    std::vector<std::shared_ptr<Statement>> statements;
     statements.push_back(std::move(body));
 
     // Add increment if available
     if (increment) {
         statements.push_back(std::make_unique<ExpressionStatement>(std::move(increment)));
     }
-    body = std::make_unique<Block>(std::move(statements));
+    body = std::make_unique<Block>(statements);
 
     // Add condition
     if (condition) {
@@ -178,7 +202,7 @@ std::unique_ptr<Statement> Parser::forStatement() {
         statements.clear();
         statements.push_back(std::move(initializer));
         statements.push_back(std::move(body));
-        body = std::make_unique<Block>(std::move(statements));
+        body = std::make_unique<Block>(statements);
     }
 
     return body;
@@ -192,16 +216,19 @@ std::unique_ptr<Statement> Parser::breakStatement() {
     return std::make_unique<BreakStatement>();
 }
 
-std::unique_ptr<Expression> Parser::expression() {
-    return comma();
+std::unique_ptr<Expression> Parser::expression(bool disable_comma) {
+    return comma(disable_comma);
 }
 
-std::unique_ptr<Expression> Parser::comma() {
+std::unique_ptr<Expression> Parser::comma(bool disable_comma) {
     auto left = assignment();
-    while (match({TokenType::COMMA})) {
-        auto op = previous();
-        auto right = assignment();
-        left = std::make_unique<Binary>(std::move(left), op, std::move(right));
+
+    if (!disable_comma) {
+        while (match({TokenType::COMMA})) {
+            auto op = previous();
+            auto right = assignment();
+            left = std::make_unique<Binary>(std::move(left), op, std::move(right));
+        }
     }
 
     return left;
@@ -450,7 +477,7 @@ std::unique_ptr<Expression> Parser::finishCall(std::unique_ptr<Expression> calle
             if (arguments.size() >= 255) {
                 error(peek(), "Can't have more than 255 arguments.");
             }
-            arguments.push_back(expression());
+            arguments.push_back(expression(true));
         } while (match({TokenType::COMMA}));
     }
 

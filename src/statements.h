@@ -17,6 +17,7 @@ class Block;
 class IfStatement;
 class WhileStatement;
 class BreakStatement;
+class Function;
 
 class StatementVisitor {
 public:
@@ -27,6 +28,7 @@ public:
     virtual void visitIfStatement(IfStatement& i) = 0;
     virtual void visitWhileStatement(WhileStatement& w) = 0;
     virtual void visitBreakStatement(BreakStatement& b) = 0;
+    virtual void visitFunction(Function& f) = 0;
 
     virtual ~StatementVisitor() = default;
 };
@@ -103,7 +105,7 @@ private:
 
 class Block : public Statement {
 public:
-    explicit Block(std::vector<std::unique_ptr<Statement>>&& statements) : statements_(std::move(statements)) {}
+    explicit Block(std::vector<std::shared_ptr<Statement>>& statements) : statements_(statements) {}
 
     ~Block() override = default;
 
@@ -111,12 +113,12 @@ public:
         visitor.visitBlock(*this);
     }
 
-    [[nodiscard]] std::vector<std::unique_ptr<Statement>>& getStatements() {
+    [[nodiscard]] std::vector<std::shared_ptr<Statement>>& getStatements() {
         return statements_;
     }
 
 private:
-    std::vector<std::unique_ptr<Statement>> statements_;
+    std::vector<std::shared_ptr<Statement>> statements_;
 };
 
 class IfStatement : public Statement {
@@ -187,6 +189,36 @@ public:
     void accept(StatementVisitor& visitor) override {
         visitor.visitBreakStatement(*this);
     }
+};
+
+class Function : public Statement {
+public:
+    Function(const Token& name, const std::vector<Token>& params, std::vector<std::shared_ptr<Statement>>& body)
+    : name_(name), params_(params), body_(body)
+    {}
+
+    ~Function() override = default;
+
+    void accept(StatementVisitor& visitor) override {
+        visitor.visitFunction(*this);
+    }
+
+    [[nodiscard]] const Token& getName() const {
+        return name_;
+    }
+
+    [[nodiscard]] const std::vector<Token>& getParams() const {
+        return params_;
+    }
+
+    [[nodiscard]] const std::vector<std::shared_ptr<Statement>>& getBody() const {
+        return body_;
+    }
+
+private:
+    Token name_;
+    std::vector<Token> params_;
+    std::vector<std::shared_ptr<Statement>> body_;
 };
 
 #endif //LOX_STATEMENTS_H
