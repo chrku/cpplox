@@ -69,6 +69,7 @@ private:
     std::shared_ptr<Statement> function(const std::string& kind);
     std::vector<std::shared_ptr<Statement>> block();
     std::unique_ptr<Statement> printStatement();
+    std::unique_ptr<Statement> returnStatement();
     std::unique_ptr<Statement> ifStatement();
     std::unique_ptr<Statement> whileStatement();
     std::unique_ptr<Statement> forStatement();

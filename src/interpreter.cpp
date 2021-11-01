@@ -297,6 +297,16 @@ void Interpreter::visitFunction(Function& f) {
     environment_->define(f.getName().getLexeme(), function);
 }
 
+void Interpreter::visitReturn(Return& r) {
+    LoxType value = NullType{};
+    if (r.getValue()) {
+        value = evaluate(*r.getValue());
+        valueStack_.pop_back();
+    }
+
+    throw ReturnException{value};
+}
+
 bool Interpreter::isTruthy(const LoxType& t) {
     bool return_value;
 
@@ -432,11 +442,13 @@ const std::shared_ptr<Environment>& Interpreter::getEnvironment() const {
     return environment_;
 }
 
+ReturnException::ReturnException(const LoxType& value)
+    : value_(value)
+{
 
+}
 
-
-
-
-
-
+const LoxType& ReturnException::getValue() const {
+    return value_;
+}
 

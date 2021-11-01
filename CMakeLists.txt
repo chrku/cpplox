@@ -14,4 +14,6 @@ add_executable(lox
                src/parser.cpp
                src/interpreter.cpp
                src/types.cpp
-               src/environment.cpp src/native_functions/clock.cpp src/native_functions/clock.h src/loxfunction.cpp src/loxfunction.h)
+               src/environment.cpp
+               src/native_functions/clock.cpp
+               src/loxfunction.cpp)

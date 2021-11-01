@@ -42,6 +42,15 @@ public:
     BreakException() = default;
 };
 
+class ReturnException : public std::exception {
+public:
+    explicit ReturnException(const LoxType& value);
+
+    [[nodiscard]] const LoxType& getValue() const;
+private:
+    LoxType value_;
+};
+
 class Interpreter : public ExpressionVisitor, public StatementVisitor {
 public:
     /*!
@@ -98,6 +107,7 @@ private:
     void visitWhileStatement(WhileStatement& w) override;
     void visitBreakStatement(BreakStatement& b) override;
     void visitFunction(Function& f) override;
+    void visitReturn(Return& r) override;
 
     [[nodiscard]] static bool isTruthy(const LoxType& t);
     [[nodiscard]] static double negate(const Token& op, const LoxType& t);

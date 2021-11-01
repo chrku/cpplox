@@ -20,7 +20,11 @@ LoxType LoxFunction::call(Interpreter& interpreter, std::vector<LoxType>& argume
         environment->define(params_[i].getLexeme(), arguments[i]);
     }
 
-    interpreter.executeBlock(statements_, environment);
+    try {
+        interpreter.executeBlock(statements_, environment);
+    } catch (const ReturnException& r) {
+        return r.getValue();
+    }
 
     return NullType{};
 }

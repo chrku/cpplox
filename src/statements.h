@@ -18,6 +18,7 @@ class IfStatement;
 class WhileStatement;
 class BreakStatement;
 class Function;
+class Return;
 
 class StatementVisitor {
 public:
@@ -29,6 +30,7 @@ public:
     virtual void visitWhileStatement(WhileStatement& w) = 0;
     virtual void visitBreakStatement(BreakStatement& b) = 0;
     virtual void visitFunction(Function& f) = 0;
+    virtual void visitReturn(Return& r) = 0;
 
     virtual ~StatementVisitor() = default;
 };
@@ -219,6 +221,31 @@ private:
     Token name_;
     std::vector<Token> params_;
     std::vector<std::shared_ptr<Statement>> body_;
+};
+
+class Return : public Statement {
+public:
+    Return(const Token& keyword, std::unique_ptr<Expression> value)
+        : keyword_(keyword), value_(std::move(value))
+    {}
+
+    ~Return() override = default;
+
+    void accept(StatementVisitor& visitor) override {
+        visitor.visitReturn(*this);
+    }
+
+    [[nodiscard]] const Token& getKeyword() const {
+        return keyword_;
+    }
+
+    [[nodiscard]] const std::unique_ptr<Expression>& getValue() const {
+        return value_;
+    }
+
+private:
+    Token keyword_;
+    std::unique_ptr<Expression> value_;
 };
 
 #endif //LOX_STATEMENTS_H
