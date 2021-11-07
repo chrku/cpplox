@@ -447,6 +447,10 @@ const std::shared_ptr<Environment>& Interpreter::getEnvironment() const {
     return environment_;
 }
 
+void Interpreter::resolve(Expression* expr, int depth) {
+    locals_[expr] = depth;
+}
+
 ReturnException::ReturnException(const LoxType& value)
     : value_(value)
 {

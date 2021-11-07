@@ -10,9 +10,12 @@
 
 #include <unordered_map>
 
+class LoxInterpreter;
+
 class Resolver : public ExpressionVisitor, public StatementVisitor {
 public:
-    Resolver(std::shared_ptr<Interpreter> interpreter);
+    Resolver(std::shared_ptr<Interpreter> interpreter,
+             std::shared_ptr<LoxInterpreter> context);
 
     void visitBinary(Binary &b) override;
 
@@ -55,6 +58,7 @@ public:
     ~Resolver() override = default;
 private:
     std::shared_ptr<Interpreter> interpreter_;
+    std::shared_ptr<LoxInterpreter> context_;
     std::vector<std::unordered_map<std::string, bool>> scopes_;
 
     void beginScope();
@@ -66,6 +70,7 @@ private:
 
     void declare(const Token& name);
     void define(const Token& name);
+    void resolveLocal(Expression* expr, const std::string& name);
 };
 
 

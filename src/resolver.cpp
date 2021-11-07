@@ -3,9 +3,11 @@
 //
 
 #include "resolver.h"
+#include "lox.h"
 
-Resolver::Resolver(std::shared_ptr<Interpreter> interpreter)
-    : interpreter_{std::move(interpreter)}, scopes_{}
+Resolver::Resolver(std::shared_ptr<Interpreter> interpreter,
+                   std::shared_ptr<LoxInterpreter> context)
+    : interpreter_{std::move(interpreter)}, context_{std::move(context)}, scopes_{}
 {}
 
 void Resolver::visitBinary(Binary& b) {
@@ -29,7 +31,16 @@ void Resolver::visitUnary(Unary& u) {
 }
 
 void Resolver::visitVariableAccess(VariableAccess& v) {
+    if (!scopes_.empty()) {
+        auto& scope = scopes_.back();
+        const auto& name = v.getToken().getLexeme();
+        if (scope.count(name) && !scope[name]) {
+            context_->error(v.getToken(),
+                            "Can't read local variable in its own initializer");
+        }
+    }
 
+    resolveLocal(v);
 }
 
 void Resolver::visitAssignment(Assignment& a) {
@@ -122,5 +133,13 @@ void Resolver::define(const Token& name) {
     if (scopes_.empty()) { return; }
     auto& scope = scopes_.back();
     scope[name.getLexeme()] = true;
+}
+
+void Resolver::resolveLocal(Expression* expr, const std::string& name) {
+    for (auto i = scopes_.size(); i >= 0; --i) {
+        if (scopes_[i].count(name)) {
+            interpreter_->resolve(expr, static_cast<int>(i));
+        }
+    }
 }
 

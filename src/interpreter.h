@@ -12,6 +12,7 @@
 
 #include <vector>
 #include <string_view>
+#include <unordered_map>
 
 class LoxInterpreter;
 
@@ -85,9 +86,13 @@ public:
 
     void executeBlock(const std::vector<std::shared_ptr<Statement>>& statements,
                       std::shared_ptr<Environment> new_environment);
+
+    void resolve(Expression* expr, int depth);
 private:
     std::vector<LoxType> valueStack_;
     std::shared_ptr<Environment> environment_;
+
+    std::unordered_map<Expression*, int> locals_;
 
     void visitBinary(Binary &b) override;
     void visitTernary(Ternary &t) override;
