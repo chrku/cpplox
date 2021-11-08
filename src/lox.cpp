@@ -6,11 +6,15 @@
 #include "scanner.h"
 #include "parser.h"
 #include "interpreter.h"
-#include "utils.h"
+#include "resolver.h"
 
 #include <fstream>
 #include <string>
 #include <iostream>
+
+LoxInterpreter::LoxInterpreter() : interpreter_{std::make_shared<Interpreter>()} {
+
+}
 
 void LoxInterpreter::runFile(const char *filename) {
     std::ifstream ifs{filename};
@@ -57,7 +61,7 @@ void LoxInterpreter::run(std::unique_ptr<std::string> source, bool repl_mode) {
 
         if (!hadError_) {
             try {
-                auto result = interpreter_.evaluate(*expression);
+                auto result = interpreter_->evaluate(*expression);
                 std::cout << stringify(result) << std::endl;
             } catch (const RuntimeError &error) {
                 runtimeError(error);
@@ -72,8 +76,11 @@ void LoxInterpreter::run(std::unique_ptr<std::string> source, bool repl_mode) {
     auto program = parser.parse();
     if (hadError_) { return; }
 
+    Resolver resolver{interpreter_, shared_from_this()};
+    resolver.resolve(program);
+
     try {
-        interpreter_.interpret(program, shared_from_this());
+        interpreter_->interpret(program, shared_from_this());
     } catch (const RuntimeError& error) {
         runtimeError(error);
     }
@@ -110,4 +117,5 @@ void LoxInterpreter::enableParseErrorReporting() {
 void LoxInterpreter::disableParseErrorReporting() {
     silentParseErrors_ = true;
 }
+
 

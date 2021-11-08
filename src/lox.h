@@ -21,6 +21,8 @@
  */
 class LoxInterpreter : public std::enable_shared_from_this<LoxInterpreter> {
 public:
+    LoxInterpreter();
+
     /*!
      * Run file containing lox commands
      * @param filename C-Style string containing the file name of the script to be run
@@ -62,7 +64,7 @@ private:
     bool hadError_ = false;
     bool hadRuntimeError_ = false;
     bool silentParseErrors_ = false;
-    Interpreter interpreter_;
+    std::shared_ptr<Interpreter> interpreter_;
 
     void reportError(int line, std::string_view where, std::string_view message);
 

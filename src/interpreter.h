@@ -122,6 +122,7 @@ private:
     [[nodiscard]] static bool isEqual(const LoxType& t1, const LoxType& t2);
 
     static void checkNumberOperands(const Token& op, const LoxType& t1, const LoxType& t2);
+    LoxType lookUpVariable(const Token& name, Expression* expr);
 };
 
 

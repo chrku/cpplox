@@ -17,6 +17,8 @@ public:
     Resolver(std::shared_ptr<Interpreter> interpreter,
              std::shared_ptr<LoxInterpreter> context);
 
+    void resolve(std::vector<std::shared_ptr<Statement>>& statements);
+
     void visitBinary(Binary &b) override;
 
     void visitTernary(Ternary &t) override;
@@ -66,7 +68,6 @@ private:
 
     void resolve(Expression& e);
     void resolve(Statement& s);
-    void resolve(std::vector<std::shared_ptr<Statement>>& statements);
 
     void declare(const Token& name);
     void define(const Token& name);

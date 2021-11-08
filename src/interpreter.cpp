@@ -165,15 +165,19 @@ void Interpreter::visitUnary(Unary& u) {
 }
 
 void Interpreter::visitVariableAccess(VariableAccess& v) {
-    valueStack_.emplace_back(environment_->get(v.getToken()));
+    valueStack_.emplace_back(lookUpVariable(v.getToken(), &v));
 }
 
 void Interpreter::visitAssignment(Assignment& a) {
     evaluate(*a.getValue());
-
     // Get result of expression
     LoxType result_val = valueStack_.back();
-    environment_->assign(a.getName(), result_val);
+
+    if (locals_.count(&a)) {
+        environment_->assignAt(a.getName(), result_val, locals_[&a]);
+    } else {
+        globals_->assign(a.getName(), result_val);
+    }
 }
 
 void Interpreter::visitLogical(Logical& l) {
@@ -450,6 +454,14 @@ const std::shared_ptr<Environment>& Interpreter::getEnvironment() const {
 
 void Interpreter::resolve(Expression* expr, int depth) {
     locals_[expr] = depth;
+}
+
+LoxType Interpreter::lookUpVariable(const Token& name, Expression* expr) {
+    if (locals_.count(expr)) {
+        return environment_->getAt(name, locals_[expr]);
+    } else {
+        return globals_->get(name);
+    }
 }
 
 ReturnException::ReturnException(const LoxType& value)
