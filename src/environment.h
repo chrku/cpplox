@@ -32,6 +32,8 @@ public:
      */
     const LoxType& get(const Token& token);
 
+    const LoxType& getAt(const Token& token, int distance);
+
     /*!
      * Re-assign variable
      * @param token token representing variable name
@@ -40,11 +42,15 @@ public:
      */
     void assign(const Token& name, LoxType value);
 
+    void assignAt(const Token& name, LoxType value, int distance);
+
     /*!
      * Set enclosing scope
      * @param enclosing handle to enclosing scope
      */
     void setEnclosing(std::shared_ptr<Environment> enclosing);
+
+    Environment* ancestor(int distance);
 private:
     std::shared_ptr<Environment> enclosing_; // Represents upper-level scope
     std::unordered_map<std::string, LoxType> values_;

@@ -90,6 +90,7 @@ public:
     void resolve(Expression* expr, int depth);
 private:
     std::vector<LoxType> valueStack_;
+    std::shared_ptr<Environment> globals_;
     std::shared_ptr<Environment> environment_;
 
     std::unordered_map<Expression*, int> locals_;

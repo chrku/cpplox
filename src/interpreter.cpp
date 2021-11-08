@@ -17,8 +17,9 @@ const Token& RuntimeError::getToken() const {
     return token_;
 }
 
-Interpreter::Interpreter() : valueStack_{}, environment_{std::make_shared<Environment>()} {
-    environment_->define("clock",
+Interpreter::Interpreter()
+    : valueStack_{}, globals_{std::make_shared<Environment>()}, environment_{globals_} {
+    globals_->define("clock",
                      std::make_shared<Clock>());
 }
 

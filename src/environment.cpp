@@ -23,6 +23,10 @@ const LoxType& Environment::get(const Token& token) {
                        "Undefined variable '" + token.getLexeme() + "'.");
 }
 
+const LoxType& Environment::getAt(const Token& token, int distance) {
+    return ancestor(distance)->get(token);
+}
+
 void Environment::assign(const Token& name, LoxType value) {
     if (values_.count(name.getLexeme())) {
         values_[name.getLexeme()] = std::move(value);
@@ -38,6 +42,21 @@ void Environment::assign(const Token& name, LoxType value) {
                        "Undefined variable '" + name.getLexeme() + "'.");
 }
 
+void Environment::assignAt(const Token &name, LoxType value, int distance) {
+    ancestor(distance)->assign(name, std::move(value));
+}
+
 void Environment::setEnclosing(std::shared_ptr<Environment> enclosing) {
     enclosing_ = std::move(enclosing);
 }
+
+Environment* Environment::ancestor(int distance) {
+    Environment* environment = this;
+    for (int i = 0; i < distance; ++i) {
+        environment = environment->enclosing_.get();
+    }
+
+    return environment;
+}
+
+
