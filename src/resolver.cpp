@@ -155,6 +155,10 @@ void Resolver::resolve(std::vector<std::shared_ptr<Statement>>& statements) {
 void Resolver::declare(const Token& name) {
     if (scopes_.empty()) { return; }
     auto& scope = scopes_.back();
+    if (scope.count(name.getLexeme())) {
+        context_->error(name,
+                        "Already a variable with this name in this scope.");
+    }
     scope[name.getLexeme()] = false;
 }
 
