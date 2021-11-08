@@ -65,6 +65,9 @@ void Resolver::visitCall(Call& c) {
 }
 
 void Resolver::visitFunctionExpression(FunctionExpression& f) {
+    auto enclosing = currentFunction_;
+    currentFunction_ = FunctionType::FUNCTION;
+
     beginScope();
     for (const auto& param : f.getParams()) {
         declare(param);
@@ -72,6 +75,7 @@ void Resolver::visitFunctionExpression(FunctionExpression& f) {
     }
     resolve(f.getBody());
     endScope();
+    currentFunction_ = enclosing;
 }
 
 void Resolver::visitExpressionStatement(ExpressionStatement& s) {
@@ -117,6 +121,13 @@ void Resolver::visitFunction(Function& f) {
     declare(f.getName());
     define(f.getName());
 
+    resolveFunction(f, FunctionType::FUNCTION);
+}
+
+void Resolver::resolveFunction(Function &f, FunctionType type) {
+    auto enclosing = currentFunction_;
+    currentFunction_ = type;
+
     beginScope();
     for (const auto& param : f.getParams()) {
         declare(param);
@@ -124,9 +135,13 @@ void Resolver::visitFunction(Function& f) {
     }
     resolve(f.getBody());
     endScope();
+    currentFunction_ = enclosing;
 }
 
 void Resolver::visitReturn(Return& r) {
+    if (currentFunction_ == FunctionType::NONE) {
+        context_->error(r.getKeyword(), "Can't return from top-level code.");
+    }
     resolve(*r.getValue());
 }
 

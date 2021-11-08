@@ -79,6 +79,8 @@ void LoxInterpreter::run(std::unique_ptr<std::string> source, bool repl_mode) {
     Resolver resolver{interpreter_, shared_from_this()};
     resolver.resolve(program);
 
+    if (hadError_) { return; }
+
     try {
         interpreter_->interpret(program, shared_from_this());
     } catch (const RuntimeError& error) {
