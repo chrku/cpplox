@@ -165,7 +165,7 @@ void Resolver::define(const Token& name) {
 }
 
 void Resolver::resolveLocal(Expression* expr, const std::string& name) {
-    for (auto i = scopes_.size(); i >= 0; --i) {
+    for (int i = static_cast<int>(scopes_.size()); i >= 0; --i) {
         if (scopes_[i].count(name)) {
             interpreter_->resolve(expr, static_cast<int>(i));
         }
