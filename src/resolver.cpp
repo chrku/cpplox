@@ -2,6 +2,7 @@
 // Created by Christoph Kummer on 04.11.21.
 //
 
+#include "token.h"
 #include "resolver.h"
 #include "lox.h"
 
@@ -11,15 +12,18 @@ Resolver::Resolver(std::shared_ptr<Interpreter> interpreter,
 {}
 
 void Resolver::visitBinary(Binary& b) {
-
+    resolve(*b.getLeft());
+    resolve(*b.getRight());
 }
 
 void Resolver::visitTernary(Ternary& t) {
-
+    resolve(*t.getLeft());
+    resolve(*t.getMiddle());
+    resolve(*t.getRight());
 }
 
 void Resolver::visitGrouping(Grouping& g) {
-
+    resolve(*g.getExpression());
 }
 
 void Resolver::visitLiteral(Literal& l) {
@@ -27,7 +31,7 @@ void Resolver::visitLiteral(Literal& l) {
 }
 
 void Resolver::visitUnary(Unary& u) {
-
+    resolve(*u.getRight());
 }
 
 void Resolver::visitVariableAccess(VariableAccess& v) {
@@ -40,31 +44,42 @@ void Resolver::visitVariableAccess(VariableAccess& v) {
         }
     }
 
-    resolveLocal(v);
+    resolveLocal(&v, v.getToken().getLexeme());
 }
 
 void Resolver::visitAssignment(Assignment& a) {
-
+    resolve(*a.getValue());
+    resolveLocal(&a, a.getName().getLexeme());
 }
 
 void Resolver::visitLogical(Logical& l) {
-
+    resolve(*l.getLeft());
+    resolve(*l.getRight());
 }
 
 void Resolver::visitCall(Call& c) {
-
+    for (const auto& expr : c.getArguments()) {
+        resolve(*expr);
+    }
+    resolve(*c.getCallee());
 }
 
 void Resolver::visitFunctionExpression(FunctionExpression& f) {
-
+    beginScope();
+    for (const auto& param : f.getParams()) {
+        declare(param);
+        define(param);
+    }
+    resolve(f.getBody());
+    endScope();
 }
 
 void Resolver::visitExpressionStatement(ExpressionStatement& s) {
-
+    resolve(*s.getExpression());
 }
 
 void Resolver::visitPrintStatement(PrintStatement& p) {
-
+    resolve(*p.getExpression());
 }
 
 void Resolver::visitVariableDeclaration(VariableDeclaration& v) {
@@ -82,11 +97,16 @@ void Resolver::visitBlock(Block& b) {
 }
 
 void Resolver::visitIfStatement(IfStatement& i) {
-
+    resolve(*i.getCondition());
+    resolve(*i.getThenBranch());
+    if (i.getElseBranch()) {
+        resolve(*i.getElseBranch());
+    }
 }
 
 void Resolver::visitWhileStatement(WhileStatement& w) {
-
+    resolve(*w.getCondition());
+    resolve(*w.getThenBranch());
 }
 
 void Resolver::visitBreakStatement(BreakStatement& b) {
@@ -94,11 +114,20 @@ void Resolver::visitBreakStatement(BreakStatement& b) {
 }
 
 void Resolver::visitFunction(Function& f) {
+    declare(f.getName());
+    define(f.getName());
 
+    beginScope();
+    for (const auto& param : f.getParams()) {
+        declare(param);
+        define(param);
+    }
+    resolve(f.getBody());
+    endScope();
 }
 
 void Resolver::visitReturn(Return& r) {
-
+    resolve(*r.getValue());
 }
 
 void Resolver::beginScope() {

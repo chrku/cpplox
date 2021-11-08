@@ -6,12 +6,12 @@
 #include "interpreter.h"
 
 
-LoxFunction::LoxFunction(const Function& function, std::shared_ptr<Environment> closure)
+LoxFunction::LoxFunction(Function& function, std::shared_ptr<Environment> closure)
     : statements_(function.getBody()), params_(function.getParams()), closure_(std::move(closure))
 {}
 
 
-LoxFunction::LoxFunction(const FunctionExpression &function, std::shared_ptr<Environment> closure)
+LoxFunction::LoxFunction(FunctionExpression &function, std::shared_ptr<Environment> closure)
     : statements_(function.getBody()), params_(function.getParams()), closure_(std::move(closure))
 {}
 

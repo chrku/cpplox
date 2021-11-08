@@ -12,9 +12,9 @@
 
 class LoxFunction : public Callable {
 public:
-    LoxFunction(const Function& function, std::shared_ptr<Environment> closure);
+    LoxFunction(Function& function, std::shared_ptr<Environment> closure);
 
-    LoxFunction(const FunctionExpression& function, std::shared_ptr<Environment> closure);
+    LoxFunction(FunctionExpression& function, std::shared_ptr<Environment> closure);
 
     LoxType call(Interpreter &interpreter, std::vector<LoxType> &arguments) override;
 

@@ -213,7 +213,7 @@ public:
         return params_;
     }
 
-    [[nodiscard]] const std::vector<std::shared_ptr<Statement>>& getBody() const {
+    [[nodiscard]] std::vector<std::shared_ptr<Statement>>& getBody() {
         return body_;
     }
 
