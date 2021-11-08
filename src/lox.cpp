@@ -16,10 +16,11 @@ LoxInterpreter::LoxInterpreter() : interpreter_{std::make_shared<Interpreter>()}
 
 }
 
-void LoxInterpreter::runFile(const char *filename) {
+void LoxInterpreter::runFile(const char* filename) {
     std::ifstream ifs{filename};
     if (!ifs.good()) { // We have to check if the stream could be opened
-        throw std::invalid_argument{"File could not be opened"};
+        std::cerr << "File " << filename << " could not be opened" << std::endl;
+        std::exit(64);
     }
 
     // Read file into string
