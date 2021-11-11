@@ -12,14 +12,24 @@
 #include <string>
 #include <iostream>
 
-LoxInterpreter::LoxInterpreter() : interpreter_{std::make_shared<Interpreter>()} {
+LoxInterpreter::LoxInterpreter()
+: interpreter_{std::make_shared<Interpreter>()}, outputStream_{&std::cout}, errorStream_{&std::cerr}
+{
 
 }
+
+LoxInterpreter::LoxInterpreter(std::ostream *output_stream, std::ostream *error_stream, bool test_mode)
+: interpreter_{std::make_shared<Interpreter>(output_stream)},
+  outputStream_{output_stream}, errorStream_{error_stream}, testMode_{test_mode}
+{
+
+}
+
 
 void LoxInterpreter::runFile(const char* filename) {
     std::ifstream ifs{filename};
     if (!ifs.good()) { // We have to check if the stream could be opened
-        std::cerr << "File " << filename << " could not be opened" << std::endl;
+        *errorStream_ << "File " << filename << " could not be opened" << std::endl;
         std::exit(64);
     }
 
@@ -29,10 +39,14 @@ void LoxInterpreter::runFile(const char* filename) {
     run(std::move(source), false);
 
     if (hadError_) {
-        std::exit(65);
+        if (!testMode_) {
+            std::exit(65);
+        }
     }
     if (hadRuntimeError_) {
-        std::exit(70);
+        if (!testMode_) {
+            std::exit(70);
+        }
     }
 }
 
@@ -95,7 +109,7 @@ void LoxInterpreter::error(int line, std::string_view message) {
 
 void LoxInterpreter::reportError(int line, std::string_view where, std::string_view message) {
     if (!silentParseErrors_) {
-        std::cout << "[line " << line << "] Error " << where << ": " << message << std::endl;
+        *errorStream_ << "[line " << line << "] Error " << where << ": " << message << std::endl;
     }
     hadError_ = true;
 }
@@ -109,7 +123,7 @@ void LoxInterpreter::error(const Token& token, std::string_view message) {
 }
 
 void LoxInterpreter::runtimeError(const RuntimeError& e) {
-    std::cout << e.what() << "\nline " << e.getToken().getLine() << "]\n";
+    *errorStream_ << "[" << e.what() << " line " << e.getToken().getLine() << "]\n";
     hadRuntimeError_ = true;
 }
 

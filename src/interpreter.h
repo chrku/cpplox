@@ -13,6 +13,7 @@
 #include <vector>
 #include <string_view>
 #include <unordered_map>
+#include <ostream>
 
 class LoxInterpreter;
 
@@ -59,6 +60,8 @@ public:
      */
     Interpreter();
 
+    Interpreter(std::ostream* ostream);
+
     /*!
      * Interpret lox program
      * @param program sequence of statements
@@ -94,6 +97,9 @@ private:
     std::shared_ptr<Environment> environment_;
 
     std::unordered_map<Expression*, int> locals_;
+
+    bool testMode_;
+    std::ostream* outputStream_;
 
     void visitBinary(Binary &b) override;
     void visitTernary(Ternary &t) override;

@@ -18,7 +18,16 @@ const Token& RuntimeError::getToken() const {
 }
 
 Interpreter::Interpreter()
-    : valueStack_{}, globals_{std::make_shared<Environment>()}, environment_{globals_} {
+: valueStack_{}, globals_{std::make_shared<Environment>()}, environment_{globals_}, outputStream_{&std::cout}
+{
+    globals_->define("clock",
+                     std::make_shared<Clock>());
+}
+
+
+Interpreter::Interpreter(std::ostream *ostream)
+: valueStack_{}, globals_{std::make_shared<Environment>()}, environment_{globals_}, outputStream_{ostream}
+{
     globals_->define("clock",
                      std::make_shared<Clock>());
 }
@@ -246,7 +255,7 @@ void Interpreter::visitPrintStatement(PrintStatement &p) {
     LoxType result_val = valueStack_.back();
     valueStack_.pop_back();
 
-    std::cout << stringify(result_val) << '\n';
+    *outputStream_ << stringify(result_val) << '\n';
 }
 
 void Interpreter::visitVariableDeclaration(VariableDeclaration& v) {
@@ -463,6 +472,7 @@ LoxType Interpreter::lookUpVariable(const Token& name, Expression* expr) {
         return globals_->get(name);
     }
 }
+
 
 ReturnException::ReturnException(const LoxType& value)
     : value_(value)
