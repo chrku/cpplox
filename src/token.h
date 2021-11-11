@@ -49,6 +49,11 @@ public:
     [[nodiscard]] const std::variant<std::monostate, double, std::string>& getLiteral() const;
     [[nodiscard]] const std::string& getLexeme() const;
     [[nodiscard]] int getLine() const;
+
+    bool operator==(const Token& rhs) const;
+
+    bool operator!=(const Token& rhs) const;
+
 private:
     const TokenType type_;
     const std::string lexeme_;
@@ -65,5 +70,24 @@ private:
  * @return output stream handle
  */
 std::ostream& operator<<(std::ostream& os, const Token& t);
+
+namespace std {
+    template <>
+    struct hash<Token>
+    {
+        std::size_t operator()(const Token& k) const
+        {
+            using std::size_t;
+            using std::hash;
+            using std::string;
+
+            // Compute individual hash values for first,
+            // second and third and combine them using XOR
+            // and bit shifting:
+
+            return ((hash<string>()(k.getLexeme())));
+        }
+    };
+}
 
 #endif //LOX_TOKEN_H

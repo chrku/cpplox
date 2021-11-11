@@ -46,3 +46,11 @@ const std::string& Token::getLexeme() const {
 int Token::getLine() const {
     return line_;
 }
+
+bool Token::operator==(const Token& rhs) const {
+    return lexeme_ == rhs.lexeme_;
+}
+
+bool Token::operator!=(const Token& rhs) const {
+    return !(rhs == *this);
+}

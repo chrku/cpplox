@@ -9,6 +9,7 @@
 #include "interpreter.h"
 
 #include <unordered_map>
+#include <unordered_set>
 
 class LoxInterpreter;
 
@@ -66,7 +67,8 @@ public:
 private:
     std::shared_ptr<Interpreter> interpreter_;
     std::shared_ptr<LoxInterpreter> context_;
-    std::vector<std::unordered_map<std::string, bool>> scopes_;
+    std::vector<std::unordered_map<Token, bool>> scopes_;
+    std::vector<std::unordered_set<Token>> usage_;
     FunctionType currentFunction_ = FunctionType::NONE;
 
     void beginScope();
@@ -77,7 +79,7 @@ private:
 
     void declare(const Token& name);
     void define(const Token& name);
-    void resolveLocal(Expression* expr, const std::string& name);
+    void resolveLocal(Expression* expr, const Token& name);
 
     void resolveFunction(Function &f, FunctionType type);
 };

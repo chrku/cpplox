@@ -8,7 +8,7 @@
 
 Resolver::Resolver(std::shared_ptr<Interpreter> interpreter,
                    std::shared_ptr<LoxInterpreter> context)
-    : interpreter_{std::move(interpreter)}, context_{std::move(context)}, scopes_{}
+    : interpreter_{std::move(interpreter)}, context_{std::move(context)}, scopes_{}, usage_{}
 {}
 
 void Resolver::visitBinary(Binary& b) {
@@ -37,19 +37,24 @@ void Resolver::visitUnary(Unary& u) {
 void Resolver::visitVariableAccess(VariableAccess& v) {
     if (!scopes_.empty()) {
         auto& scope = scopes_.back();
-        const auto& name = v.getToken().getLexeme();
+        const auto& name = v.getToken();
         if (scope.count(name) && !scope[name]) {
             context_->error(v.getToken(),
                             "Can't read local variable in its own initializer");
         }
     }
 
-    resolveLocal(&v, v.getToken().getLexeme());
+    resolveLocal(&v, v.getToken());
+
+    if (!usage_.empty()) {
+        auto &cur_usage = usage_.back();
+        cur_usage.insert(v.getToken());
+    }
 }
 
 void Resolver::visitAssignment(Assignment& a) {
     resolve(*a.getValue());
-    resolveLocal(&a, a.getName().getLexeme());
+    resolveLocal(&a, a.getName());
 }
 
 void Resolver::visitLogical(Logical& l) {
@@ -147,10 +152,19 @@ void Resolver::visitReturn(Return& r) {
 
 void Resolver::beginScope() {
     scopes_.emplace_back();
+    usage_.emplace_back();
 }
 
 void Resolver::endScope() {
+    const auto& cur_usage_set = usage_.back();
+    for (const auto& pair : scopes_.back()) {
+        const auto& name = pair.first;
+        if (!cur_usage_set.count(name)) {
+            context_->error(name, "Local variable not used.");
+        }
+    }
     scopes_.pop_back();
+    usage_.pop_back();
 }
 
 void Resolver::resolve(Expression& e) {
@@ -170,20 +184,20 @@ void Resolver::resolve(std::vector<std::shared_ptr<Statement>>& statements) {
 void Resolver::declare(const Token& name) {
     if (scopes_.empty()) { return; }
     auto& scope = scopes_.back();
-    if (scope.count(name.getLexeme())) {
+    if (scope.count(name)) {
         context_->error(name,
                         "Already a variable with this name in this scope.");
     }
-    scope[name.getLexeme()] = false;
+    scope[name] = false;
 }
 
 void Resolver::define(const Token& name) {
     if (scopes_.empty()) { return; }
     auto& scope = scopes_.back();
-    scope[name.getLexeme()] = true;
+    scope[name] = true;
 }
 
-void Resolver::resolveLocal(Expression* expr, const std::string& name) {
+void Resolver::resolveLocal(Expression* expr, const Token& name) {
     for (int i = static_cast<int>(scopes_.size()) - 1; i >= 0; --i) {
         if (scopes_[i].count(name)) {
             interpreter_->resolve(expr, static_cast<int>(i));
