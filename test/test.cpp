@@ -47,3 +47,28 @@ TEST(LoxTests, CounterTest) {
                   "");
 }
 
+TEST(LoxTests, FibTest1) {
+    expectProgram("examples/fib.lox", "0.000000\n1.000000\n1.000000\n2.000000\n3.000000\n"
+                                      "5.000000\n8.000000\n13.000000\n21.000000\n34.000000\n55.000000\n89.000000"
+                                      "\n144.000000\n233.000000\n377.000000\n610.000000\n987.000000\n1597.000000"
+                                      "\n2584.000000\n4181.000000\n",
+                  "");
+}
+
+TEST(LoxTests, FibTest2) {
+    expectProgram("examples/fibo.lox", "0.000000\n1.000000\n1.000000\n2.000000\n3.000000\n"
+                                      "5.000000\n8.000000\n13.000000\n21.000000\n34.000000\n55.000000\n89.000000"
+                                      "\n144.000000\n233.000000\n377.000000\n610.000000\n987.000000\n1597.000000"
+                                      "\n2584.000000\n4181.000000\n6765.000000\n",
+                  "");
+}
+
+TEST(LoxTests, HiTest) {
+    expectProgram("examples/hi.lox", "Hi, Dear Reader!\n",
+                  "");
+}
+
+TEST(LoxTests, IfTest1) {
+    expectProgram("examples/if_1.lox", "2.000000\n4.000000\n",
+                  "");
+}

@@ -47,8 +47,12 @@ void Resolver::visitVariableAccess(VariableAccess& v) {
     resolveLocal(&v, v.getToken());
 
     if (!usage_.empty()) {
-        auto &cur_usage = usage_.back();
-        cur_usage.insert(v.getToken());
+        for (int i = static_cast<int>(usage_.size()) - 1; i >= 0; --i) {
+            auto &cur_usage = usage_[i];
+            if (scopes_[i].count(v.getToken())) {
+                cur_usage.insert(v.getToken());
+            }
+        }
     }
 }
 
