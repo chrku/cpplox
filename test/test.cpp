@@ -72,3 +72,35 @@ TEST(LoxTests, IfTest1) {
     expectProgram("examples/if_1.lox", "2.000000\n4.000000\n",
                   "");
 }
+
+TEST(LoxTests, LogicalOps) {
+    expectProgram("examples/logicalops.lox", "hi\nyes\n",
+                  "");
+}
+
+TEST(LoxTests, RecursionTest) {
+    expectProgram("examples/recursion.lox", "1.000000\n2.000000\n3.000000\n4.000000\n5.000000"
+                                            "\n6.000000\n7.000000\n8.000000\n9.000000\n10.000000\n",
+                  "");
+}
+
+TEST(LoxTests, ReturnTest) {
+    expectProgram("examples/return_error.lox", "",
+                  "[line 1] Error at 'return': Can't return from top-level code.\n");
+}
+
+TEST(LoxTests, ScopeTest) {
+    expectProgram("examples/scopes.lox", "inner a\nouter b\nglobal c\nouter a\nouter b\n"
+                                         "global c\nglobal a\nglobal b\nglobal c\n",
+                  "");
+}
+
+TEST(LoxTests, ScopeTest2) {
+    expectProgram("examples/scopes_2.lox", "",
+                  "[line 3] Error at 'a': Can't read local variable in its own initializer\n");
+}
+
+TEST(LoxTests, Thrice) {
+    expectProgram("examples/thrice.lox", "1.000000\n2.000000\n3.000000\n",
+                  "");
+}

@@ -204,7 +204,8 @@ void Resolver::define(const Token& name) {
 void Resolver::resolveLocal(Expression* expr, const Token& name) {
     for (int i = static_cast<int>(scopes_.size()) - 1; i >= 0; --i) {
         if (scopes_[i].count(name)) {
-            interpreter_->resolve(expr, static_cast<int>(i));
+            interpreter_->resolve(expr, static_cast<int>(scopes_.size() - i - 1));
+            break;
         }
     }
 }
