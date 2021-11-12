@@ -60,7 +60,7 @@ public:
      */
     Interpreter();
 
-    Interpreter(std::ostream* ostream);
+    Interpreter(std::ostream* ostream, bool test_mode);
 
     /*!
      * Interpret lox program

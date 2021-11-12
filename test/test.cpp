@@ -5,7 +5,6 @@
 #include "lox.h"
 
 #include <string_view>
-#include <sstream>
 #include <gtest/gtest.h>
 
 void expectProgram(const char* filename,
@@ -26,5 +25,25 @@ TEST(LoxTests, BreakTest) {
 TEST(LoxTests, BreakErrorTest1) {
     expectProgram("examples/break_error_1.lox", "",
                   "[line 1] Error at 'break': Can only use break within loop\n");
+}
+
+TEST(LoxTests, BreakErrorTest2) {
+    expectProgram("examples/break_error_2.lox", "",
+                  "[line 10] Error at 'break': Can only use break within loop\n");
+}
+
+TEST(LoxTests, ClockTest) {
+    expectProgram("examples/clock.lox", "0.000000\n",
+                  "");
+}
+
+TEST(LoxTests, ClosureTest) {
+    expectProgram("examples/closure_test.lox", "global\nglobal\nblock\n",
+                  "");
+}
+
+TEST(LoxTests, CounterTest) {
+    expectProgram("examples/counter.lox", "1.000000\n2.000000\n",
+                  "");
 }
 

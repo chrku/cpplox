@@ -9,11 +9,15 @@
 
 class Clock : public Callable {
 public:
+    Clock(bool test_mode);
+
     LoxType call(Interpreter &interpreter, std::vector<LoxType> &arguments) override;
 
     int arity() override;
 
     ~Clock() override;
+private:
+    bool testMode_;
 };
 
 

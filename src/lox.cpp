@@ -19,7 +19,7 @@ LoxInterpreter::LoxInterpreter()
 }
 
 LoxInterpreter::LoxInterpreter(std::ostream *output_stream, std::ostream *error_stream, bool test_mode)
-: interpreter_{std::make_shared<Interpreter>(output_stream)},
+: interpreter_{std::make_shared<Interpreter>(output_stream, test_mode)},
   outputStream_{output_stream}, errorStream_{error_stream}, testMode_{test_mode}
 {
 

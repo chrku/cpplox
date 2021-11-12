@@ -21,15 +21,15 @@ Interpreter::Interpreter()
 : valueStack_{}, globals_{std::make_shared<Environment>()}, environment_{globals_}, outputStream_{&std::cout}
 {
     globals_->define("clock",
-                     std::make_shared<Clock>());
+                     std::make_shared<Clock>(false));
 }
 
 
-Interpreter::Interpreter(std::ostream *ostream)
+Interpreter::Interpreter(std::ostream *ostream, bool test_mode)
 : valueStack_{}, globals_{std::make_shared<Environment>()}, environment_{globals_}, outputStream_{ostream}
 {
     globals_->define("clock",
-                     std::make_shared<Clock>());
+                     std::make_shared<Clock>(test_mode));
 }
 
 void Interpreter::interpret(std::vector<std::shared_ptr<Statement>>& program,
