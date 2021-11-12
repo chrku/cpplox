@@ -104,3 +104,18 @@ TEST(LoxTests, Thrice) {
     expectProgram("examples/thrice.lox", "1.000000\n2.000000\n3.000000\n",
                   "");
 }
+
+TEST(LoxTests, Unused) {
+    expectProgram("examples/unused.lox", "",
+                  "[line 2] Error at 'a': Local variable not used.\n");
+}
+
+TEST(LoxTests, VarTest) {
+    expectProgram("examples/var_test.lox", "",
+                  "[line 3] Error at 'a': Can't read local variable in its own initializer\n");
+}
+
+TEST(LoxTests, WhileTest1) {
+    expectProgram("examples/while_1.lox", "3.000000\n4.000000\n5.000000\n6.000000\n7.000000\n8.000000\n9.000000\n10.000000\n",
+                  "");
+}
