@@ -7,9 +7,16 @@
 
 #include "types.h"
 
+/**
+ * Native function - returns time since Unix epoch
+ */
 class Clock : public Callable {
 public:
-    Clock(bool test_mode);
+    /**
+     * Constructor - executed once at interpreter startup
+     * @param test_mode enables test mode, gives deterministic output for testing
+     */
+    explicit Clock(bool test_mode);
 
     LoxType call(Interpreter &interpreter, std::vector<LoxType> &arguments) override;
 
