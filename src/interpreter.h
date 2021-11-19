@@ -60,7 +60,7 @@ public:
      */
     Interpreter();
 
-    Interpreter(std::ostream* ostream, bool test_mode);
+    explicit Interpreter(std::ostream *ostream);
 
     /*!
      * Interpret lox program
@@ -90,15 +90,16 @@ public:
     void executeBlock(const std::vector<std::shared_ptr<Statement>>& statements,
                       std::shared_ptr<Environment> new_environment);
 
-    void resolve(Expression* expr, int depth);
+    void resolve(Expression* expr, std::size_t location, std::size_t depth);
+
+    void defineGlobal(std::size_t index, LoxType value);
 private:
     std::vector<LoxType> valueStack_;
     std::shared_ptr<Environment> globals_;
     std::shared_ptr<Environment> environment_;
 
-    std::unordered_map<Expression*, int> locals_;
+    std::unordered_map<Expression*, std::pair<std::size_t, std::size_t>> exprLocations_;
 
-    bool testMode_;
     std::ostream* outputStream_;
 
     void visitBinary(Binary &b) override;
@@ -128,7 +129,7 @@ private:
     [[nodiscard]] static bool isEqual(const LoxType& t1, const LoxType& t2);
 
     static void checkNumberOperands(const Token& op, const LoxType& t1, const LoxType& t2);
-    LoxType lookUpVariable(const Token& name, Expression* expr);
+    LoxType lookUpVariable(Expression* expr);
 };
 
 

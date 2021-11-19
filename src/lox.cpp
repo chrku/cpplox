@@ -19,7 +19,7 @@ LoxInterpreter::LoxInterpreter()
 }
 
 LoxInterpreter::LoxInterpreter(std::ostream *output_stream, std::ostream *error_stream, bool test_mode)
-: interpreter_{std::make_shared<Interpreter>(output_stream, test_mode)},
+: interpreter_{std::make_shared<Interpreter>(output_stream)},
   outputStream_{output_stream}, errorStream_{error_stream}, testMode_{test_mode}
 {
 
@@ -91,7 +91,7 @@ void LoxInterpreter::run(std::unique_ptr<std::string> source, bool repl_mode) {
     auto program = parser.parse();
     if (hadError_) { return; }
 
-    Resolver resolver{interpreter_, shared_from_this()};
+    Resolver resolver{interpreter_, shared_from_this(), testMode_};
     resolver.resolve(program);
 
     if (hadError_) { return; }

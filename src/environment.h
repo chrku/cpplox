@@ -7,7 +7,6 @@
 
 #include "types.h"
 
-#include <unordered_map>
 #include <string>
 #include <iostream>
 
@@ -17,12 +16,14 @@
  */
 class Environment {
 public:
+    std::size_t define();
+
     /*!
      * Define new variable
-     * @param name name of the variable
      * @param value value of the variable
+     * @return index of that variable in array
      */
-    void define(const std::string& name, LoxType value);
+    std::size_t define(LoxType value);
 
     /*!
      * Get value for variable
@@ -30,9 +31,9 @@ public:
      * @return value if available
      * @throws RuntimeError if it does not exist
      */
-    const LoxType& get(const Token& token);
+    const LoxType& get(std::size_t index);
 
-    const LoxType& getAt(const Token& token, int distance);
+    const LoxType& getAt(std::size_t index, int distance);
 
     /*!
      * Re-assign variable
@@ -40,9 +41,9 @@ public:
      * @param value new value
      * @throws RuntimeError if it does not exist
      */
-    void assign(const Token& name, LoxType value);
+    void assign(std::size_t index, LoxType value);
 
-    void assignAt(const Token& name, LoxType value, int distance);
+    void assignAt(std::size_t index, LoxType value, int distance);
 
     /*!
      * Set enclosing scope
@@ -53,7 +54,7 @@ public:
     Environment* ancestor(int distance);
 private:
     std::shared_ptr<Environment> enclosing_; // Represents upper-level scope
-    std::unordered_map<std::string, LoxType> values_;
+    std::vector<LoxType> values_;
 };
 
 

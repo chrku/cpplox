@@ -5,11 +5,17 @@
 #include "token.h"
 #include "resolver.h"
 #include "lox.h"
+#include "native_functions/clock.h"
 
 Resolver::Resolver(std::shared_ptr<Interpreter> interpreter,
-                   std::shared_ptr<LoxInterpreter> context)
+                   std::shared_ptr<LoxInterpreter> context,
+                   bool test_mode)
     : interpreter_{std::move(interpreter)}, context_{std::move(context)}, scopes_{}, usage_{}
-{}
+{
+    Token clockToken = Token(TokenType::IDENTIFIER, "clock", 0);
+    defineGlobal(clockToken);
+    interpreter_->defineGlobal(globalLocations_[clockToken], std::make_shared<Clock>(test_mode));
+}
 
 void Resolver::visitBinary(Binary& b) {
     resolve(*b.getLeft());
@@ -157,6 +163,8 @@ void Resolver::visitReturn(Return& r) {
 void Resolver::beginScope() {
     scopes_.emplace_back();
     usage_.emplace_back();
+    localLocations_.emplace_back();
+    localIndexStack_.emplace_back(0);
 }
 
 void Resolver::endScope() {
@@ -169,6 +177,8 @@ void Resolver::endScope() {
     }
     scopes_.pop_back();
     usage_.pop_back();
+    localLocations_.pop_back();
+    localIndexStack_.pop_back();
 }
 
 void Resolver::resolve(Expression& e) {
@@ -196,17 +206,38 @@ void Resolver::declare(const Token& name) {
 }
 
 void Resolver::define(const Token& name) {
-    if (scopes_.empty()) { return; }
+    if (scopes_.empty()) {
+        defineGlobal(name);
+        return;
+    }
     auto& scope = scopes_.back();
     scope[name] = true;
+    defineLocal(name);
 }
 
 void Resolver::resolveLocal(Expression* expr, const Token& name) {
     for (int i = static_cast<int>(scopes_.size()) - 1; i >= 0; --i) {
         if (scopes_[i].count(name)) {
-            interpreter_->resolve(expr, static_cast<int>(scopes_.size() - i - 1));
-            break;
+            interpreter_->resolve(expr, localLocations_[i][name], scopes_.size() - i - 1);
+            return;
         }
     }
+
+    if (!globalLocations_.count(name)) {
+        context_->error(name, "Undefined variable.");
+    }
+    interpreter_->resolve(expr, globalLocations_[name], GLOBAL_DEPTH);
+}
+
+void Resolver::defineGlobal(const Token& name) {
+    auto location = globalIndex_++;
+    globalLocations_[name] = location;
+}
+
+void Resolver::defineLocal(const Token& name) {
+    auto& current_map = localLocations_.back();
+    auto& index = localIndexStack_.back();
+    auto location = index++;
+    current_map[name] = location;
 }
 

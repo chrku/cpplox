@@ -21,7 +21,8 @@ enum class FunctionType {
 class Resolver : public ExpressionVisitor, public StatementVisitor {
 public:
     Resolver(std::shared_ptr<Interpreter> interpreter,
-             std::shared_ptr<LoxInterpreter> context);
+             std::shared_ptr<LoxInterpreter> context,
+             bool test_mode);
 
     void resolve(std::vector<std::shared_ptr<Statement>>& statements);
 
@@ -47,12 +48,20 @@ public:
     void visitReturn(Return &r) override;
 
     ~Resolver() override = default;
+
+    constexpr static std::size_t GLOBAL_DEPTH = std::numeric_limits<std::size_t>::max();
 private:
     std::shared_ptr<Interpreter> interpreter_;
     std::shared_ptr<LoxInterpreter> context_;
     std::vector<std::unordered_map<Token, bool>> scopes_;
     std::vector<std::unordered_set<Token>> usage_;
     FunctionType currentFunction_ = FunctionType::NONE;
+
+    std::vector<std::unordered_map<Token, std::size_t>> localLocations_;
+    std::unordered_map<Token, std::size_t> globalLocations_;
+
+    std::vector<std::size_t> localIndexStack_;
+    std::size_t globalIndex_ = 0;
 
     void beginScope();
     void endScope();
@@ -64,7 +73,9 @@ private:
     void define(const Token& name);
     void resolveLocal(Expression* expr, const Token& name);
 
-    void resolveFunction(Function &f, FunctionType type);
+    void resolveFunction(Function& f, FunctionType type);
+    void defineGlobal(const Token& name);
+    void defineLocal(const Token& name);
 };
 
 

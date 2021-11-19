@@ -7,8 +7,10 @@
 #include "lox.h"
 #include "loxfunction.h"
 #include "native_functions/clock.h"
+#include "resolver.h"
 
 #include <iostream>
+#include <utility>
 
 RuntimeError::RuntimeError(Token t, const std::string &message) : std::runtime_error(message), token_(std::move(t)) {
 }
@@ -20,16 +22,12 @@ const Token& RuntimeError::getToken() const {
 Interpreter::Interpreter()
 : valueStack_{}, globals_{std::make_shared<Environment>()}, environment_{globals_}, outputStream_{&std::cout}
 {
-    globals_->define("clock",
-                     std::make_shared<Clock>(false));
 }
 
 
-Interpreter::Interpreter(std::ostream *ostream, bool test_mode)
+Interpreter::Interpreter(std::ostream *ostream)
 : valueStack_{}, globals_{std::make_shared<Environment>()}, environment_{globals_}, outputStream_{ostream}
 {
-    globals_->define("clock",
-                     std::make_shared<Clock>(test_mode));
 }
 
 void Interpreter::interpret(std::vector<std::shared_ptr<Statement>>& program,
@@ -174,7 +172,7 @@ void Interpreter::visitUnary(Unary& u) {
 }
 
 void Interpreter::visitVariableAccess(VariableAccess& v) {
-    valueStack_.emplace_back(lookUpVariable(v.getToken(), &v));
+    valueStack_.emplace_back(lookUpVariable(&v));
 }
 
 void Interpreter::visitAssignment(Assignment& a) {
@@ -182,10 +180,17 @@ void Interpreter::visitAssignment(Assignment& a) {
     // Get result of expression
     LoxType result_val = valueStack_.back();
 
-    if (locals_.count(&a)) {
-        environment_->assignAt(a.getName(), result_val, locals_[&a]);
+    if (exprLocations_.count(&a)) {
+        const auto& location = exprLocations_[&a];
+        const auto index = location.first;
+        const auto depth = location.second;
+        if (depth == Resolver::GLOBAL_DEPTH) {
+            globals_->assign(index, result_val);
+        } else {
+            environment_->assignAt(index, result_val, static_cast<int>(depth));
+        }
     } else {
-        globals_->assign(a.getName(), result_val);
+        throw std::runtime_error("Unresolved variable.");
     }
 }
 
@@ -259,7 +264,6 @@ void Interpreter::visitPrintStatement(PrintStatement &p) {
 }
 
 void Interpreter::visitVariableDeclaration(VariableDeclaration& v) {
-
     LoxType value = NullType{};
 
     if (v.getExpression()) {
@@ -268,7 +272,7 @@ void Interpreter::visitVariableDeclaration(VariableDeclaration& v) {
         valueStack_.pop_back();
     }
 
-    environment_->define(v.getToken().getLexeme(), value);
+    environment_->define(value);
 }
 
 void Interpreter::visitBlock(Block& b) {
@@ -313,7 +317,7 @@ void Interpreter::visitBreakStatement(BreakStatement &b) {
 
 void Interpreter::visitFunction(Function& f) {
     std::shared_ptr<LoxFunction> function = std::make_shared<LoxFunction>(f, environment_);
-    environment_->define(f.getName().getLexeme(), function);
+    environment_->define(function);
 }
 
 void Interpreter::visitReturn(Return& r) {
@@ -461,18 +465,25 @@ const std::shared_ptr<Environment>& Interpreter::getEnvironment() const {
     return environment_;
 }
 
-void Interpreter::resolve(Expression* expr, int depth) {
-    locals_[expr] = depth;
+void Interpreter::resolve(Expression* expr, std::size_t location, std::size_t depth) {
+    exprLocations_[expr] = std::make_pair(location, depth);
 }
 
-LoxType Interpreter::lookUpVariable(const Token& name, Expression* expr) {
-    if (locals_.count(expr)) {
-        return environment_->getAt(name, locals_[expr]);
+LoxType Interpreter::lookUpVariable(Expression* expr) {
+    const auto& location = exprLocations_[expr];
+    const auto loc = location.first;
+    const auto depth = location.second;
+
+    if (depth == Resolver::GLOBAL_DEPTH) {
+        return globals_->get(loc);
     } else {
-        return globals_->get(name);
+        return environment_->getAt(loc, static_cast<int>(depth));
     }
 }
 
+void Interpreter::defineGlobal(std::size_t index, LoxType value) {
+    globals_->define(std::move(value));
+}
 
 ReturnException::ReturnException(const LoxType& value)
     : value_(value)

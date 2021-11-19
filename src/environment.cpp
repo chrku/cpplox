@@ -6,44 +6,46 @@
 
 #include "interpreter.h"
 
-#include <utility>
-
-void Environment::define(const std::string& name, LoxType value) {
-    values_[name] = std::move(value);
+std::size_t Environment::define() {
+    values_.emplace_back(NullType{});
+    return values_.size() - 1;
 }
 
-const LoxType& Environment::get(const Token& token) {
-    if (values_.count(token.getLexeme())) {
-        return values_[token.getLexeme()];
+std::size_t Environment::define(LoxType value) {
+    values_.emplace_back(std::move(value));
+    return values_.size() - 1;
+}
+
+const LoxType& Environment::get(std::size_t index) {
+    if (index < values_.size()) {
+        return values_[index];
     }
 
-    if (enclosing_) { return enclosing_->get(token); }
+    if (enclosing_) { return enclosing_->get(index); }
 
-    throw RuntimeError(token,
-                       "Undefined variable '" + token.getLexeme() + "'.");
+    throw std::runtime_error("This should never happen.");
 }
 
-const LoxType& Environment::getAt(const Token& token, int distance) {
-    return ancestor(distance)->get(token);
+const LoxType& Environment::getAt(std::size_t index, int distance) {
+    return ancestor(distance)->get(index);
 }
 
-void Environment::assign(const Token& name, LoxType value) {
-    if (values_.count(name.getLexeme())) {
-        values_[name.getLexeme()] = std::move(value);
+void Environment::assign(std::size_t index, LoxType value) {
+    if (index < values_.size()) {
+        values_[index] = std::move(value);
         return;
     }
 
     if (enclosing_) {
-        enclosing_->assign(name, value);
+        enclosing_->assign(index, value);
         return;
     }
 
-    throw RuntimeError(name,
-                       "Undefined variable '" + name.getLexeme() + "'.");
+    throw std::runtime_error("This should never happen.");
 }
 
-void Environment::assignAt(const Token &name, LoxType value, int distance) {
-    ancestor(distance)->assign(name, std::move(value));
+void Environment::assignAt(std::size_t index, LoxType value, int distance) {
+    ancestor(distance)->assign(index, std::move(value));
 }
 
 void Environment::setEnclosing(std::shared_ptr<Environment> enclosing) {
@@ -58,5 +60,6 @@ Environment* Environment::ancestor(int distance) {
 
     return environment;
 }
+
 
 

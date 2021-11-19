@@ -20,7 +20,7 @@ LoxType LoxFunction::call(Interpreter& interpreter, std::vector<LoxType>& argume
     environment->setEnclosing(closure_);
 
     for (int i = 0; i < params_.size(); ++i) {
-        environment->define(params_[i].getLexeme(), arguments[i]);
+        environment->define(arguments[i]);
     }
 
     try {
