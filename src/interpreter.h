@@ -39,11 +39,17 @@ private:
     Token token_;
 };
 
+/**
+ * Exception used to re-synchronize when breaking out of loops
+ */
 class BreakException : public std::exception {
 public:
     BreakException() = default;
 };
 
+/**
+ * Exception used to re-synchronize when returning from functions
+ */
 class ReturnException : public std::exception {
 public:
     explicit ReturnException(const LoxType& value);
@@ -53,6 +59,10 @@ private:
     LoxType value_;
 };
 
+/**
+ * Main Lox interpreter. Takes in AST and interprets it
+ * after resolve pass
+ */
 class Interpreter : public ExpressionVisitor, public StatementVisitor {
 public:
     /*!
@@ -60,6 +70,11 @@ public:
      */
     Interpreter();
 
+    /**
+     * Constructor for testing, allows redirection of standard output to
+     * alternate stream
+     * @param ostream stream to redirect print statements to
+     */
     explicit Interpreter(std::ostream *ostream);
 
     /*!
@@ -85,19 +100,42 @@ public:
 
     ~Interpreter() override = default;
 
+    /**
+     * Get current environment
+     * @return reference to current environment
+     */
     [[nodiscard]] const std::shared_ptr<Environment>& getEnvironment() const;
 
+    /**
+     * Execute block of statements, e.g. in a function
+     * @param statements reference to block of statements
+     * @param new_environment new environment to use for block
+     */
     void executeBlock(const std::vector<std::shared_ptr<Statement>>& statements,
                       std::shared_ptr<Environment> new_environment);
 
+    /**
+     * During resolve pass, this tells the interpreter where to look for
+     * local variables
+     * @param expr location in AST
+     * @param location location in scope array
+     * @param depth distance from current scope for lookup
+     */
     void resolve(Expression* expr, std::size_t location, std::size_t depth);
 
-    void defineGlobal(std::size_t index, LoxType value);
+    /**
+     * Assign value to global variable, which will be placed into globals array
+     * Used to define native functions at interpreter startup by resolver
+     * @param value value to initialize global to
+     */
+    void defineGlobal(LoxType value);
 private:
     std::vector<LoxType> valueStack_;
     std::shared_ptr<Environment> globals_;
     std::shared_ptr<Environment> environment_;
 
+    // Location of local variables, associates AST tree location with location in scope relative
+    // to current scope
     std::unordered_map<Expression*, std::pair<std::size_t, std::size_t>> exprLocations_;
 
     std::ostream* outputStream_;

@@ -50,6 +50,7 @@ public:
     [[nodiscard]] const std::string& getLexeme() const;
     [[nodiscard]] int getLine() const;
 
+    // Overloads for hash map
     bool operator==(const Token& rhs) const;
 
     bool operator!=(const Token& rhs) const;

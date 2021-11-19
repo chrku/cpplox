@@ -10,10 +10,23 @@
 #include "token.h"
 #include "environment.h"
 
+/**
+ * This represents user-defined functions in Lox
+ */
 class LoxFunction : public Callable {
 public:
+    /**
+     * Constructor used for normal functions
+     * @param function Reference to normal function in AST
+     * @param closure enclosing environment used for lookups
+     */
     LoxFunction(Function& function, std::shared_ptr<Environment> closure);
 
+    /**
+     * Constructor used for anonymous functions
+     * @param function Reference to anonymous function
+     * @param closure enclosing environment used for lookups
+     */
     LoxFunction(FunctionExpression& function, std::shared_ptr<Environment> closure);
 
     LoxType call(Interpreter &interpreter, std::vector<LoxType> &arguments) override;

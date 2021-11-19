@@ -481,7 +481,7 @@ LoxType Interpreter::lookUpVariable(Expression* expr) {
     }
 }
 
-void Interpreter::defineGlobal(std::size_t index, LoxType value) {
+void Interpreter::defineGlobal(LoxType value) {
     globals_->define(std::move(value));
 }
 

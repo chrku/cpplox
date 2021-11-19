@@ -235,6 +235,9 @@ private:
     std::unique_ptr<Expression> value_;
 };
 
+/**
+ * Representation of logical expressions
+ */
 class Logical : public Expression {
 public:
     Logical(std::unique_ptr<Expression> left, const Token& token, std::unique_ptr<Expression> right)
@@ -264,6 +267,9 @@ private:
     std::unique_ptr<Expression> right_;
 };
 
+/**
+ * Representation of function call expressions
+ */
 class Call : public Expression {
 public:
     Call(std::unique_ptr<Expression> callee, const Token& paren, std::vector<std::unique_ptr<Expression>>&& arguments)
@@ -293,6 +299,9 @@ private:
     std::vector<std::unique_ptr<Expression>> arguments_;
 };
 
+/**
+ * Representation of lambda functions or anonymous functions
+ */
 class FunctionExpression : public Expression {
 public:
     FunctionExpression(const std::vector<Token>& arguments, std::vector<std::shared_ptr<Statement>>  statements)

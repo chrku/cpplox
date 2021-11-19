@@ -14,7 +14,7 @@ Resolver::Resolver(std::shared_ptr<Interpreter> interpreter,
 {
     Token clockToken = Token(TokenType::IDENTIFIER, "clock", 0);
     defineGlobal(clockToken);
-    interpreter_->defineGlobal(globalLocations_[clockToken], std::make_shared<Clock>(test_mode));
+    interpreter_->defineGlobal(std::make_shared<Clock>(test_mode));
 }
 
 void Resolver::visitBinary(Binary& b) {

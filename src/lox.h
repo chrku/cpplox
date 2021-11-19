@@ -22,8 +22,18 @@
  */
 class LoxInterpreter : public std::enable_shared_from_this<LoxInterpreter> {
 public:
+    /**
+     * Default constructor, write output to stdout and errors to stderr
+     */
     LoxInterpreter();
 
+    /**
+     * Alternate constructor for testing
+     * @param output_stream where to redirect stdout to
+     * @param error_stream where to redirect stderr to
+     * @param test_mode whether to enable test mode, which makes
+     * non-deterministic functions deterministic
+     */
     LoxInterpreter(std::ostream* output_stream, std::ostream* error_stream, bool test_mode = true);
 
     /*!

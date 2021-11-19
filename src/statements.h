@@ -45,6 +45,9 @@ public:
     virtual void accept(StatementVisitor& visitor) = 0;
 };
 
+/**
+ * Variable declarations
+ */
 class VariableDeclaration : public Statement {
 public:
     VariableDeclaration(std::unique_ptr<Expression> expression, Token token) : expression_(std::move(expression)),
@@ -69,6 +72,9 @@ private:
     Token token_;
 };
 
+/**
+ * Expression statements
+ */
 class ExpressionStatement : public Statement {
 public:
     explicit ExpressionStatement(std::unique_ptr<Expression> expression) : expression_(std::move(expression)) {}
@@ -87,6 +93,9 @@ private:
     std::unique_ptr<Expression> expression_;
 };
 
+/**
+ * Print statements
+ */
 class PrintStatement : public Statement {
 public:
     explicit PrintStatement(std::unique_ptr<Expression> expression) : expression_(std::move(expression)) {}
@@ -105,6 +114,9 @@ private:
     std::unique_ptr<Expression> expression_;
 };
 
+/**
+ * Blocks
+ */
 class Block : public Statement {
 public:
     explicit Block(std::vector<std::shared_ptr<Statement>>& statements) : statements_(statements) {}
@@ -123,6 +135,9 @@ private:
     std::vector<std::shared_ptr<Statement>> statements_;
 };
 
+/**
+ * If statements
+ */
 class IfStatement : public Statement {
 public:
     IfStatement(std::unique_ptr<Expression> condition,
@@ -156,6 +171,9 @@ private:
     std::unique_ptr<Statement> elseBranch_;
 };
 
+/**
+ * While statements
+ */
 class WhileStatement : public Statement {
 public:
     WhileStatement(std::unique_ptr<Expression> condition,
@@ -182,9 +200,12 @@ private:
     std::unique_ptr<Statement> thenBranch_;
 };
 
+/**
+ * Break statements
+ */
 class BreakStatement : public Statement {
 public:
-    BreakStatement() {}
+    BreakStatement() = default;
 
     ~BreakStatement() override = default;
 
@@ -193,6 +214,9 @@ public:
     }
 };
 
+/**
+ * Functions
+ */
 class Function : public Statement {
 public:
     Function(const Token& name, const std::vector<Token>& params, std::vector<std::shared_ptr<Statement>>& body)
@@ -223,6 +247,9 @@ private:
     std::vector<std::shared_ptr<Statement>> body_;
 };
 
+/**
+ * Return statements
+ */
 class Return : public Statement {
 public:
     Return(const Token& keyword, std::unique_ptr<Expression> value)

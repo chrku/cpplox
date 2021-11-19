@@ -13,17 +13,36 @@
 
 class LoxInterpreter;
 
+/**
+ * Represents different types of functions,
+ * e.g. methods and normal functions
+ */
 enum class FunctionType {
     NONE,
     FUNCTION
 };
 
+/**
+ * This class does the resolve pass,
+ * which maps variable names to their locations
+ */
 class Resolver : public ExpressionVisitor, public StatementVisitor {
 public:
+    /**
+     * Constructor
+     * @param interpreter reference to interpreter
+     * @param context reference to runtime for error reporting
+     * @param test_mode test mode, for making non-deterministic functions
+     * behave deterministically
+     */
     Resolver(std::shared_ptr<Interpreter> interpreter,
              std::shared_ptr<LoxInterpreter> context,
              bool test_mode);
 
+    /**
+     * Resolve program, used by runtime to execute resolve pass
+     * @param statements program
+     */
     void resolve(std::vector<std::shared_ptr<Statement>>& statements);
 
     void visitBinary(Binary &b) override;
@@ -49,6 +68,9 @@ public:
 
     ~Resolver() override = default;
 
+    /**
+     * Marker value for expressions in global scope
+     */
     constexpr static std::size_t GLOBAL_DEPTH = std::numeric_limits<std::size_t>::max();
 private:
     std::shared_ptr<Interpreter> interpreter_;
