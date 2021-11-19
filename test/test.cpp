@@ -105,6 +105,11 @@ TEST(LoxTests, Thrice) {
                   "");
 }
 
+TEST(LoxTests, UndefinedVar1) {
+    expectProgram("examples/undefined_var.lox", "",
+                  "[line 1] Error at 'a': Undefined variable.\n");
+}
+
 TEST(LoxTests, Unused) {
     expectProgram("examples/unused.lox", "",
                   "[line 2] Error at 'a': Local variable not used.\n");
