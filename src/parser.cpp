@@ -33,9 +33,10 @@ void Parser::reset() {
 
 std::shared_ptr<Statement> Parser::declaration() {
     try {
+        if (match({TokenType::CLASS})) { return classDeclaration(); }
         if (check(TokenType::FUN) && checkNext(TokenType::IDENTIFIER)) {
             advance();
-            return function("function");
+            return functionDeclaration();
         }
         if (match({TokenType::VAR})) { return varDeclaration(); }
         return statement();
@@ -90,7 +91,7 @@ std::unique_ptr<Statement> Parser::expressionStatement() {
     return std::make_unique<ExpressionStatement>(std::move(expr));
 }
 
-std::shared_ptr<Statement> Parser::function(const std::string& kind) {
+std::shared_ptr<Function> Parser::function(const std::string& kind) {
     Token name = consume(TokenType::IDENTIFIER, "Expect " + kind + " name.");
     std::vector<Token> params;
 
@@ -110,6 +111,24 @@ std::shared_ptr<Statement> Parser::function(const std::string& kind) {
     auto body = block();
 
     return std::make_unique<Function>(name, params, body);
+}
+
+std::shared_ptr<Statement> Parser::functionDeclaration() {
+    return function("function");
+}
+
+std::shared_ptr<Statement> Parser::classDeclaration() {
+    auto name = consume(TokenType::IDENTIFIER, "Expect class name");
+    consume(TokenType::LEFT_BRACE, "Expect '{' before class body");
+
+    std::vector<std::shared_ptr<Function>> methods;
+    while (!check(TokenType::RIGHT_BRACE) && !isAtEnd()) {
+        methods.push_back(function("method"));
+    }
+
+    consume(TokenType::RIGHT_BRACE, "Expect '}' after class body.");
+
+    return std::make_shared<ClassDeclaration>(name, std::move(methods));
 }
 
 std::vector<std::shared_ptr<Statement>> Parser::block() {
@@ -534,5 +553,7 @@ std::unique_ptr<Expression> Parser::handleFunctionExpression() {
 
     return std::make_unique<FunctionExpression>(params, body);
 }
+
+
 
 

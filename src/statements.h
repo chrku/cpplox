@@ -19,6 +19,7 @@ class WhileStatement;
 class BreakStatement;
 class Function;
 class Return;
+class ClassDeclaration;
 
 class StatementVisitor {
 public:
@@ -31,6 +32,7 @@ public:
     virtual void visitBreakStatement(BreakStatement& b) = 0;
     virtual void visitFunction(Function& f) = 0;
     virtual void visitReturn(Return& r) = 0;
+    virtual void visitClassDeclaration(ClassDeclaration& c) = 0;
 
     virtual ~StatementVisitor() = default;
 };
@@ -219,8 +221,8 @@ public:
  */
 class Function : public Statement {
 public:
-    Function(const Token& name, const std::vector<Token>& params, std::vector<std::shared_ptr<Statement>>& body)
-    : name_(name), params_(params), body_(body)
+    Function(Token  name, std::vector<Token> params, std::vector<std::shared_ptr<Statement>>& body)
+    : name_(std::move(name)), params_(std::move(params)), body_(body)
     {}
 
     ~Function() override = default;
@@ -252,8 +254,8 @@ private:
  */
 class Return : public Statement {
 public:
-    Return(const Token& keyword, std::unique_ptr<Expression> value)
-        : keyword_(keyword), value_(std::move(value))
+    Return(Token  keyword, std::unique_ptr<Expression> value)
+        : keyword_(std::move(keyword)), value_(std::move(value))
     {}
 
     ~Return() override = default;
@@ -273,6 +275,34 @@ public:
 private:
     Token keyword_;
     std::unique_ptr<Expression> value_;
+};
+
+/**
+ * Class declarations
+ */
+class ClassDeclaration : public Statement {
+public:
+    ClassDeclaration(Token  name, std::vector<std::shared_ptr<Function>> methods)
+        : name_{std::move(name)}, methods_(std::move(methods))
+    {}
+
+    ~ClassDeclaration() override = default;
+
+    void accept(StatementVisitor& visitor) override {
+        visitor.visitClassDeclaration(*this);
+    }
+
+    [[nodiscard]] const Token& getName() const {
+        return name_;
+    }
+
+    [[nodiscard]] const std::vector<std::shared_ptr<Function>>& getMethods() const {
+        return methods_;
+    }
+
+private:
+    Token name_;
+    std::vector<std::shared_ptr<Function>> methods_;
 };
 
 #endif //LOX_STATEMENTS_H

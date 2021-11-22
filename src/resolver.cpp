@@ -160,6 +160,11 @@ void Resolver::visitReturn(Return& r) {
     resolve(*r.getValue());
 }
 
+void Resolver::visitClassDeclaration(ClassDeclaration& c) {
+    declare(c.getName());
+    define(c.getName());
+}
+
 void Resolver::beginScope() {
     scopes_.emplace_back();
     usage_.emplace_back();
@@ -240,4 +245,5 @@ void Resolver::defineLocal(const Token& name) {
     auto location = index++;
     current_map[name] = location;
 }
+
 

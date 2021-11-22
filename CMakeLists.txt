@@ -26,7 +26,7 @@ add_library(lox_common STATIC
             src/environment.cpp
             src/native_functions/clock.cpp
             src/loxfunction.cpp
-            src/resolver.cpp)
+            src/resolver.cpp src/loxclass.cpp src/loxclass.h)
 
 add_executable(lox
                src/main.cpp)

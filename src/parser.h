@@ -66,7 +66,8 @@ private:
     std::unique_ptr<Statement> varDeclaration();
     std::unique_ptr<Statement> statement();
     std::unique_ptr<Statement> expressionStatement();
-    std::shared_ptr<Statement> function(const std::string& kind);
+    std::shared_ptr<Statement> functionDeclaration();
+    std::shared_ptr<Statement> classDeclaration();
     std::vector<std::shared_ptr<Statement>> block();
     std::unique_ptr<Statement> printStatement();
     std::unique_ptr<Statement> returnStatement();
@@ -89,6 +90,9 @@ private:
     std::unique_ptr<Expression> unary();
     std::unique_ptr<Expression> call();
     std::unique_ptr<Expression> primary();
+
+    // Helper to handle both functions and methods
+    std::shared_ptr<Function> function(const std::string& kind);
 
     // Matching and handling of tokens
     bool match(std::initializer_list<TokenType> types);

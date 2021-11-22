@@ -22,6 +22,9 @@ std::string stringify(const LoxType& l) {
             },
             [&](const std::shared_ptr<Callable>& c) {
                 return_value = std::to_string(reinterpret_cast<std::uintptr_t>(c.get()));
+            },
+            [&](const std::shared_ptr<LoxClass>& s) {
+                return_value = s->getName();
             }
     }, l);
 

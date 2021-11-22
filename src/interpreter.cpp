@@ -6,6 +6,7 @@
 
 #include "lox.h"
 #include "loxfunction.h"
+#include "loxclass.h"
 #include "native_functions/clock.h"
 #include "resolver.h"
 
@@ -330,6 +331,12 @@ void Interpreter::visitReturn(Return& r) {
     throw ReturnException{value};
 }
 
+void Interpreter::visitClassDeclaration(ClassDeclaration& c) {
+    auto index = environment_->define();
+    std::shared_ptr<LoxClass> l = std::make_shared<LoxClass>(c.getName().getLexeme());
+    environment_->assign(index, l);
+}
+
 bool Interpreter::isTruthy(const LoxType& t) {
     bool return_value;
 
@@ -347,6 +354,9 @@ bool Interpreter::isTruthy(const LoxType& t) {
                 return_value = b;
             },
             [&](const std::shared_ptr<Callable>& c) {
+                return_value = true;
+            },
+            [&](const std::shared_ptr<LoxClass>& c) {
                 return_value = true;
             }
     }, t);
@@ -372,6 +382,9 @@ double Interpreter::negate(const Token& op, const LoxType &t) {
             },
             [&](const std::shared_ptr<Callable>& c) {
                 throw RuntimeError(op, "Cannot negate callable.");
+            },
+            [&](const std::shared_ptr<LoxClass>& c) {
+                throw RuntimeError(op, "Cannot negate class.");
             }
     }, t);
 
@@ -395,6 +408,9 @@ double Interpreter::toDouble(const LoxType &t) {
                 return_value = static_cast<double>(b);
             },
             [&](const std::shared_ptr<Callable>& c) {
+                return_value = std::numeric_limits<double>::quiet_NaN();
+            },
+            [&](const std::shared_ptr<LoxClass>& c) {
                 return_value = std::numeric_limits<double>::quiet_NaN();
             }
     }, t);
@@ -427,8 +443,17 @@ bool Interpreter::isEqual(const LoxType& t1, const LoxType& t2) {
                 if (std::holds_alternative<std::shared_ptr<Callable>>(t2)) {
                     const auto& c1 = std::get<std::shared_ptr<Callable>>(t2);
                     return_value = c == c1;
+                } else {
+                    return_value = false;
                 }
-                return_value = false;
+            },
+            [&](const std::shared_ptr<LoxClass>& c) {
+                if (std::holds_alternative<std::shared_ptr<LoxClass>>(t2)) {
+                    const auto& c1 = std::get<std::shared_ptr<LoxClass>>(t2);
+                    return_value = c == c1;
+                } else {
+                    return_value = false;
+                }
             }
     }, t1);
 
@@ -484,6 +509,7 @@ LoxType Interpreter::lookUpVariable(Expression* expr) {
 void Interpreter::defineGlobal(LoxType value) {
     globals_->define(std::move(value));
 }
+
 
 ReturnException::ReturnException(const LoxType& value)
     : value_(value)

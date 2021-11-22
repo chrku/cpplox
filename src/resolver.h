@@ -65,6 +65,7 @@ public:
     void visitBreakStatement(BreakStatement &b) override;
     void visitFunction(Function &f) override;
     void visitReturn(Return &r) override;
+    void visitClassDeclaration(ClassDeclaration& c) override;
 
     ~Resolver() override = default;
 

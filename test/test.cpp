@@ -32,6 +32,11 @@ TEST(LoxTests, BreakErrorTest2) {
                   "[line 10] Error at 'break': Can only use break within loop\n");
 }
 
+TEST(LoxTests, ClassTest1) {
+    expectProgram("examples/class_1.lox", "DevonshireCream\n",
+                  "");
+}
+
 TEST(LoxTests, ClockTest) {
     expectProgram("examples/clock.lox", "0.000000\n",
                   "");

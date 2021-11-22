@@ -160,6 +160,7 @@ private:
     void visitBreakStatement(BreakStatement& b) override;
     void visitFunction(Function& f) override;
     void visitReturn(Return& r) override;
+    void visitClassDeclaration(ClassDeclaration& c) override;
 
     [[nodiscard]] static bool isTruthy(const LoxType& t);
     [[nodiscard]] static double negate(const Token& op, const LoxType& t);
