@@ -3,6 +3,7 @@
 //
 
 #include "types.h"
+#include "loxinstance.h"
 
 std::string stringify(const LoxType& l) {
     std::string return_value;
@@ -25,6 +26,9 @@ std::string stringify(const LoxType& l) {
             },
             [&](const std::shared_ptr<LoxClass>& s) {
                 return_value = s->getName();
+            },
+            [&](const std::shared_ptr<LoxInstance>& s) {
+                return_value = s->getClass()->getName() + " instance";
             }
     }, l);
 

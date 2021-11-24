@@ -6,7 +6,6 @@
 #define LOX_TYPES_H
 
 #include "token.h"
-#include "loxclass.h"
 #include "utils.h"
 
 #include <memory>
@@ -19,6 +18,8 @@
 class NullType {};
 class Callable;
 class Interpreter;
+class LoxClass;
+class LoxInstance;
 
 /*!
  * Representation of the types a Lox expression can return
@@ -28,7 +29,8 @@ using LoxType = std::variant<double,
                              bool,
                              NullType,
                              std::shared_ptr<Callable>,
-                             std::shared_ptr<LoxClass>>;
+                             std::shared_ptr<LoxClass>,
+                             std::shared_ptr<LoxInstance>>;
 
 class Callable {
 public:

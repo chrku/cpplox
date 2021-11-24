@@ -32,6 +32,10 @@ TEST(LoxTests, BreakErrorTest2) {
                   "[line 10] Error at 'break': Can only use break within loop\n");
 }
 
+TEST(LoxTests, ClassCall) {
+    expectProgram("examples/class_call.lox", "", "");
+}
+
 TEST(LoxTests, ClassTest1) {
     expectProgram("examples/class_1.lox", "DevonshireCream\n",
                   "");
@@ -86,6 +90,11 @@ TEST(LoxTests, LogicalOps) {
 TEST(LoxTests, RecursionTest) {
     expectProgram("examples/recursion.lox", "1.000000\n2.000000\n3.000000\n4.000000\n5.000000"
                                             "\n6.000000\n7.000000\n8.000000\n9.000000\n10.000000\n",
+                  "");
+}
+
+TEST(LoxTests, ObjTest1) {
+    expectProgram("examples/obj_1.lox", "Bagel instance\n",
                   "");
 }
 

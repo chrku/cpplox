@@ -221,8 +221,15 @@ void Interpreter::visitCall(Call &c) {
     LoxType left_val = valueStack_.back();
     valueStack_.pop_back();
 
-    if (std::holds_alternative<std::shared_ptr<Callable>>(left_val)) {
-        auto& callable = std::get<std::shared_ptr<Callable>>(left_val);
+    if (std::holds_alternative<std::shared_ptr<Callable>>(left_val) ||
+        std::holds_alternative<std::shared_ptr<LoxClass>>(left_val) ) {
+        std::shared_ptr<Callable> callable{};
+
+        if (std::holds_alternative<std::shared_ptr<Callable>>(left_val)) {
+            callable = std::get<std::shared_ptr<Callable>>(left_val);
+        } else {
+            callable = std::get<std::shared_ptr<LoxClass>>(left_val);
+        }
 
         std::vector<LoxType> arguments;
         for (auto& argument : c.getArguments()) {
@@ -358,6 +365,9 @@ bool Interpreter::isTruthy(const LoxType& t) {
             },
             [&](const std::shared_ptr<LoxClass>& c) {
                 return_value = true;
+            },
+            [&](const std::shared_ptr<LoxInstance>& c) {
+                return_value = true;
             }
     }, t);
 
@@ -385,6 +395,9 @@ double Interpreter::negate(const Token& op, const LoxType &t) {
             },
             [&](const std::shared_ptr<LoxClass>& c) {
                 throw RuntimeError(op, "Cannot negate class.");
+            },
+            [&](const std::shared_ptr<LoxInstance>& c) {
+                throw RuntimeError(op, "Cannot negate object.");
             }
     }, t);
 
@@ -411,6 +424,9 @@ double Interpreter::toDouble(const LoxType &t) {
                 return_value = std::numeric_limits<double>::quiet_NaN();
             },
             [&](const std::shared_ptr<LoxClass>& c) {
+                return_value = std::numeric_limits<double>::quiet_NaN();
+            },
+            [&](const std::shared_ptr<LoxInstance>& c) {
                 return_value = std::numeric_limits<double>::quiet_NaN();
             }
     }, t);
@@ -450,6 +466,14 @@ bool Interpreter::isEqual(const LoxType& t1, const LoxType& t2) {
             [&](const std::shared_ptr<LoxClass>& c) {
                 if (std::holds_alternative<std::shared_ptr<LoxClass>>(t2)) {
                     const auto& c1 = std::get<std::shared_ptr<LoxClass>>(t2);
+                    return_value = c == c1;
+                } else {
+                    return_value = false;
+                }
+            },
+            [&](const std::shared_ptr<LoxInstance>& c) {
+                if (std::holds_alternative<std::shared_ptr<LoxInstance>>(t2)) {
+                    const auto& c1 = std::get<std::shared_ptr<LoxInstance>>(t2);
                     return_value = c == c1;
                 } else {
                     return_value = false;
