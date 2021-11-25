@@ -1,0 +1,9 @@
+class DevonshireCream {
+  serveOn() {
+    return "Scones";
+  }
+}
+
+var instance = DevonshireCream();
+instance.val = "property";
+print instance.val;

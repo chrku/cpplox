@@ -283,6 +283,12 @@ std::unique_ptr<Expression> Parser::assignment() {
                 const Token& name = var_access->getToken();
                 return std::make_unique<Assignment>(name, std::move(right));
             }
+
+            auto* get_expr = dynamic_cast<GetExpression*>(left.get());
+            if (get_expr) {
+                return std::make_unique<SetExpression>(std::move(get_expr->getObject()), std::move(right),
+                                                       get_expr->getName());
+            }
         }
 
         error(equals, "Invalid assignment target, has to be lvalue.");

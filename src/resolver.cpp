@@ -79,8 +79,13 @@ void Resolver::visitCall(Call& c) {
     resolve(*c.getCallee());
 }
 
-void Resolver::visitGetExpression(GetExpression &g) {
+void Resolver::visitGetExpression(GetExpression& g) {
     resolve(*g.getObject());
+}
+
+void Resolver::visitSetExpression(SetExpression& s) {
+    resolve(*s.getObject());
+    resolve(*s.getValue());
 }
 
 void Resolver::visitFunctionExpression(FunctionExpression& f) {

@@ -22,3 +22,7 @@ LoxType LoxInstance::get(const Token& name) {
     throw RuntimeError(name,
                        "Undefined property '" + name.getLexeme() + "'.");
 }
+
+void LoxInstance::set(const Token& name, LoxType value) {
+    fields_[name] = std::move(value);
+}

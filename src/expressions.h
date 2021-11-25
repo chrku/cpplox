@@ -21,6 +21,7 @@ class Logical;
 class Call;
 class FunctionExpression;
 class GetExpression;
+class SetExpression;
 
 class Statement;
 
@@ -40,6 +41,7 @@ public:
     virtual void visitCall(Call& c) = 0;
     virtual void visitFunctionExpression(FunctionExpression& f) = 0;
     virtual void visitGetExpression(GetExpression& g) = 0;
+    virtual void visitSetExpression(SetExpression& s) = 0;
 
     virtual ~ExpressionVisitor() = default;
 };
@@ -337,7 +339,7 @@ public:
     GetExpression(std::unique_ptr<Expression> object, Token name)
     : object_(std::move(object)), name(std::move(name)) {}
 
-    [[nodiscard]] const std::unique_ptr<Expression>& getObject() const {
+    [[nodiscard]] std::unique_ptr<Expression>& getObject() {
         return object_;
     }
 
@@ -346,12 +348,46 @@ public:
     }
 
     void accept(ExpressionVisitor& visitor) override {
-        return visitor.visitGetExpression(*this);
+        visitor.visitGetExpression(*this);
+    }
+
+    [[nodiscard]] bool lvalue() const override {
+        return true;
     }
 
 private:
     std::unique_ptr<Expression> object_;
     Token name;
 };
+
+/**
+ * Represents property assignment
+ */
+ class SetExpression : public Expression {
+ public:
+     SetExpression(std::unique_ptr<Expression> object, std::unique_ptr<Expression> value,
+                   Token name) : object_(std::move(object)), value_(std::move(value)), name_(std::move(name)) {}
+
+     [[nodiscard]] const std::unique_ptr<Expression>& getObject() const {
+         return object_;
+     }
+
+     [[nodiscard]] const std::unique_ptr<Expression>& getValue() const {
+         return value_;
+     }
+
+     [[nodiscard]] const Token& getName() const {
+         return name_;
+     }
+
+     void accept(ExpressionVisitor& visitor) override {
+         visitor.visitSetExpression(*this);
+     }
+
+ private:
+     std::unique_ptr<Expression> object_;
+     std::unique_ptr<Expression> value_;
+     Token name_;
+ };
 
 #endif //LOX_EXPRESSIONS_H

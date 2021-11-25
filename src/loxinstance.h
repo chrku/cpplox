@@ -16,6 +16,8 @@ public:
     [[nodiscard]] const std::shared_ptr<LoxClass>& getClass() const;
 
     LoxType get(const Token& name);
+
+    void set(const Token& name, LoxType value);
 private:
     std::shared_ptr<LoxClass> class_;
 

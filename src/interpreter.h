@@ -151,6 +151,7 @@ private:
     void visitCall(Call& c) override;
     void visitFunctionExpression(FunctionExpression& f) override;
     void visitGetExpression(GetExpression& g) override;
+    void visitSetExpression(SetExpression& s) override;
 
     void visitExpressionStatement(ExpressionStatement& s) override;
     void visitPrintStatement(PrintStatement& p) override;
