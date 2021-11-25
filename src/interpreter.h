@@ -150,6 +150,7 @@ private:
     void visitLogical(Logical& l) override;
     void visitCall(Call& c) override;
     void visitFunctionExpression(FunctionExpression& f) override;
+    void visitGetExpression(GetExpression& g) override;
 
     void visitExpressionStatement(ExpressionStatement& s) override;
     void visitPrintStatement(PrintStatement& p) override;

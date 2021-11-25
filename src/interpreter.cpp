@@ -252,6 +252,20 @@ void Interpreter::visitCall(Call &c) {
     }
 }
 
+void Interpreter::visitGetExpression(GetExpression& g) {
+    evaluate(*g.getObject());
+    LoxType val = valueStack_.back();
+    valueStack_.pop_back();
+
+    if (std::holds_alternative<std::shared_ptr<LoxInstance>>(val)) {
+        auto ptr = std::get<std::shared_ptr<LoxInstance>>(val);
+        valueStack_.emplace_back(val->get(g.getName()));
+    }
+
+    throw RuntimeError(g.getName(),
+                       "Only instances have properties.");
+}
+
 void Interpreter::visitFunctionExpression(FunctionExpression& f) {
     std::shared_ptr<LoxFunction> l = std::make_shared<LoxFunction>(f, getEnvironment());
     valueStack_.emplace_back(l);

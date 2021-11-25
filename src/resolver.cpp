@@ -79,6 +79,10 @@ void Resolver::visitCall(Call& c) {
     resolve(*c.getCallee());
 }
 
+void Resolver::visitGetExpression(GetExpression &g) {
+    resolve(*g.getObject());
+}
+
 void Resolver::visitFunctionExpression(FunctionExpression& f) {
     auto enclosing = currentFunction_;
     currentFunction_ = FunctionType::FUNCTION;
@@ -245,5 +249,6 @@ void Resolver::defineLocal(const Token& name) {
     auto location = index++;
     current_map[name] = location;
 }
+
 
 

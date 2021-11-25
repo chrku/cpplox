@@ -3,6 +3,7 @@
 //
 
 #include "loxinstance.h"
+#include "interpreter.h"
 
 #include <utility>
 
@@ -11,4 +12,13 @@ LoxInstance::LoxInstance(std::shared_ptr<LoxClass> klass) : class_{std::move(kla
 
 const std::shared_ptr<LoxClass>& LoxInstance::getClass() const {
     return class_;
+}
+
+LoxType LoxInstance::get(const Token& name) {
+    if (fields_.count(name)) {
+        return fields_[name];
+    }
+
+    throw RuntimeError(name,
+                       "Undefined property '" + name.getLexeme() + "'.");
 }

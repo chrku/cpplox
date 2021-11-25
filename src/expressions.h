@@ -5,6 +5,7 @@
 #ifndef LOX_EXPRESSIONS_H
 #define LOX_EXPRESSIONS_H
 
+#include <utility>
 #include <vector>
 #include <token.h>
 #include <types.h>
@@ -19,6 +20,7 @@ class Assignment;
 class Logical;
 class Call;
 class FunctionExpression;
+class GetExpression;
 
 class Statement;
 
@@ -37,6 +39,7 @@ public:
     virtual void visitLogical(Logical& l) = 0;
     virtual void visitCall(Call& c) = 0;
     virtual void visitFunctionExpression(FunctionExpression& f) = 0;
+    virtual void visitGetExpression(GetExpression& g);
 
     virtual ~ExpressionVisitor() = default;
 };
@@ -240,8 +243,8 @@ private:
  */
 class Logical : public Expression {
 public:
-    Logical(std::unique_ptr<Expression> left, const Token& token, std::unique_ptr<Expression> right)
-        : left_(std::move(left)), operator_(token), right_(std::move(right)) {}
+    Logical(std::unique_ptr<Expression> left, Token token, std::unique_ptr<Expression> right)
+        : left_(std::move(left)), operator_(std::move(token)), right_(std::move(right)) {}
 
     ~Logical() override = default;
 
@@ -272,8 +275,8 @@ private:
  */
 class Call : public Expression {
 public:
-    Call(std::unique_ptr<Expression> callee, const Token& paren, std::vector<std::unique_ptr<Expression>>&& arguments)
-        : callee_(std::move(callee)), paren_(paren), arguments_(std::move(arguments)) {}
+    Call(std::unique_ptr<Expression> callee, Token paren, std::vector<std::unique_ptr<Expression>>&& arguments)
+        : callee_(std::move(callee)), paren_(std::move(paren)), arguments_(std::move(arguments)) {}
 
     ~Call() override = default;
 
@@ -304,8 +307,8 @@ private:
  */
 class FunctionExpression : public Expression {
 public:
-    FunctionExpression(const std::vector<Token>& arguments, std::vector<std::shared_ptr<Statement>>  statements)
-        : params_(arguments), body_(std::move(statements)) {}
+    FunctionExpression(std::vector<Token> arguments, std::vector<std::shared_ptr<Statement>>  statements)
+        : params_(std::move(arguments)), body_(std::move(statements)) {}
 
     ~FunctionExpression() override = default;
 
@@ -324,6 +327,31 @@ public:
 private:
     std::vector<Token> params_;
     std::vector<std::shared_ptr<Statement>> body_;
+};
+
+/**
+ * Represents property access
+ */
+class GetExpression : public Expression {
+public:
+    GetExpression(std::unique_ptr<Expression> object, Token name)
+    : object_(std::move(object)), name(std::move(name)) {}
+
+    [[nodiscard]] const std::unique_ptr<Expression>& getObject() const {
+        return object_;
+    }
+
+    [[nodiscard]] const Token& getName() const {
+        return name;
+    }
+
+    void accept(ExpressionVisitor& visitor) override {
+        return visitor.visitGetExpression(*this);
+    }
+
+private:
+    std::unique_ptr<Expression> object_;
+    Token name;
 };
 
 #endif //LOX_EXPRESSIONS_H

@@ -390,6 +390,9 @@ std::unique_ptr<Expression> Parser::call() {
     while (true) {
         if (match({TokenType::LEFT_PAREN})) {
             expr = finishCall(std::move(expr));
+        } else if (match({TokenType::DOT})) {
+            auto name = consume(TokenType::IDENTIFIER, "Expect property name after '.'.");
+            expr = std::make_unique<GetExpression>(std::move(expr), name);
         } else {
             break;
         }
