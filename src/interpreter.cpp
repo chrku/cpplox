@@ -7,7 +7,7 @@
 #include "lox.h"
 #include "loxfunction.h"
 #include "loxclass.h"
-#include "native_functions/clock.h"
+#include "loxinstance.h"
 #include "resolver.h"
 
 #include <iostream>
@@ -259,7 +259,7 @@ void Interpreter::visitGetExpression(GetExpression& g) {
 
     if (std::holds_alternative<std::shared_ptr<LoxInstance>>(val)) {
         auto ptr = std::get<std::shared_ptr<LoxInstance>>(val);
-        valueStack_.emplace_back(val->get(g.getName()));
+        valueStack_.emplace_back(ptr->get(g.getName()));
     }
 
     throw RuntimeError(g.getName(),

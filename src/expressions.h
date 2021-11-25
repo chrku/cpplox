@@ -39,7 +39,7 @@ public:
     virtual void visitLogical(Logical& l) = 0;
     virtual void visitCall(Call& c) = 0;
     virtual void visitFunctionExpression(FunctionExpression& f) = 0;
-    virtual void visitGetExpression(GetExpression& g);
+    virtual void visitGetExpression(GetExpression& g) = 0;
 
     virtual ~ExpressionVisitor() = default;
 };

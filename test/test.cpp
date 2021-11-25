@@ -41,6 +41,11 @@ TEST(LoxTests, ClassTest1) {
                   "");
 }
 
+TEST(LoxTests, ClassTest2) {
+    expectProgram("examples/class_2.lox", "",
+                  "[Undefined property 'property'. line 7]\n");
+}
+
 TEST(LoxTests, ClockTest) {
     expectProgram("examples/clock.lox", "0.000000\n",
                   "");
