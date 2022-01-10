@@ -7,8 +7,8 @@
 
 #include <utility>
 
-LoxClass::LoxClass(std::string  name)
-    : name_{std::move(name)}
+LoxClass::LoxClass(std::string name, std::unordered_map<Token, std::shared_ptr<LoxFunction>> methods)
+    : name_{std::move(name)}, methods_(std::move(methods))
 {
 }
 
@@ -23,4 +23,12 @@ LoxType LoxClass::call(Interpreter& interpreter, std::vector<LoxType>& arguments
 
 int LoxClass::arity() {
     return 0;
+}
+
+std::shared_ptr<LoxFunction> LoxClass::getMethod(const Token& name) {
+    if (methods_.count(name)) {
+        return methods_.at(name);
+    }
+
+    return {};
 }

@@ -375,7 +375,14 @@ void Interpreter::visitReturn(Return& r) {
 
 void Interpreter::visitClassDeclaration(ClassDeclaration& c) {
     auto index = environment_->define();
-    std::shared_ptr<LoxClass> l = std::make_shared<LoxClass>(c.getName().getLexeme());
+
+    std::unordered_map<Token, std::shared_ptr<LoxFunction>> methods;
+    for (const std::shared_ptr<Function>& function : c.getMethods()) {
+        std::shared_ptr<LoxFunction> method = std::make_shared<LoxFunction>(*function, environment_);
+        methods[function->getName()] = method;
+    }
+
+    std::shared_ptr<LoxClass> l = std::make_shared<LoxClass>(c.getName().getLexeme(), methods);
     environment_->assign(index, l);
 }
 
@@ -570,8 +577,8 @@ void Interpreter::defineGlobal(LoxType value) {
 }
 
 
-ReturnException::ReturnException(const LoxType& value)
-    : value_(value)
+ReturnException::ReturnException(LoxType value)
+    : value_(std::move(value))
 {
 
 }

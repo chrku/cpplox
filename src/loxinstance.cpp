@@ -3,6 +3,7 @@
 //
 
 #include "loxinstance.h"
+#include "loxfunction.h"
 #include "interpreter.h"
 
 #include <utility>
@@ -16,7 +17,11 @@ const std::shared_ptr<LoxClass>& LoxInstance::getClass() const {
 
 LoxType LoxInstance::get(const Token& name) {
     if (fields_.count(name)) {
-        return fields_[name];
+        return fields_.at(name);
+    }
+
+    if (class_->getMethod(name)) {
+        return std::static_pointer_cast<Callable>(class_->getMethod(name));
     }
 
     throw RuntimeError(name,

@@ -52,7 +52,7 @@ public:
  */
 class ReturnException : public std::exception {
 public:
-    explicit ReturnException(const LoxType& value);
+    explicit ReturnException(LoxType  value);
 
     [[nodiscard]] const LoxType& getValue() const;
 private:

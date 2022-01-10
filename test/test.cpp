@@ -51,6 +51,11 @@ TEST(LoxTests, ClassTest3) {
                   "");
 }
 
+TEST(LoxTests, ClassTest4) {
+    expectProgram("examples/class_4.lox", "Crunch crunch crunch!\n",
+                  "");
+}
+
 TEST(LoxTests, ClockTest) {
     expectProgram("examples/clock.lox", "0.000000\n",
                   "");

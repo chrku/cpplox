@@ -19,7 +19,8 @@ class LoxInterpreter;
  */
 enum class FunctionType {
     NONE,
-    FUNCTION
+    FUNCTION,
+    METHOD
 };
 
 /**

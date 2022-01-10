@@ -148,7 +148,7 @@ void Resolver::visitFunction(Function& f) {
     resolveFunction(f, FunctionType::FUNCTION);
 }
 
-void Resolver::resolveFunction(Function &f, FunctionType type) {
+void Resolver::resolveFunction(Function& f, FunctionType type) {
     auto enclosing = currentFunction_;
     currentFunction_ = type;
 
@@ -171,6 +171,12 @@ void Resolver::visitReturn(Return& r) {
 
 void Resolver::visitClassDeclaration(ClassDeclaration& c) {
     declare(c.getName());
+
+    for (const auto& method : c.getMethods()) {
+        auto declaration = FunctionType::METHOD;
+        resolveFunction(*method, declaration);
+    }
+
     define(c.getName());
 }
 
