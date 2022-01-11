@@ -287,6 +287,10 @@ void Interpreter::visitSetExpression(SetExpression& s) {
     valueStack_.emplace_back(val);
 }
 
+void Interpreter::visitThisExpression(ThisExpression &t) {
+    valueStack_.emplace_back(lookUpVariable(&t));
+}
+
 void Interpreter::visitFunctionExpression(FunctionExpression& f) {
     std::shared_ptr<LoxFunction> l = std::make_shared<LoxFunction>(f, getEnvironment());
     valueStack_.emplace_back(l);

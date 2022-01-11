@@ -22,6 +22,7 @@ class Call;
 class FunctionExpression;
 class GetExpression;
 class SetExpression;
+class ThisExpression;
 
 class Statement;
 
@@ -42,6 +43,7 @@ public:
     virtual void visitFunctionExpression(FunctionExpression& f) = 0;
     virtual void visitGetExpression(GetExpression& g) = 0;
     virtual void visitSetExpression(SetExpression& s) = 0;
+    virtual void visitThisExpression(ThisExpression& s) = 0;
 
     virtual ~ExpressionVisitor() = default;
 };
@@ -389,5 +391,23 @@ private:
      std::unique_ptr<Expression> value_;
      Token name_;
  };
+
+ /**
+  * Represents "this" expressions
+  */
+class ThisExpression : public Expression {
+public:
+    ThisExpression(Token keyword) : keyword_(std::move(keyword)) {}
+
+    [[nodiscard]] const Token& getKeyword() const {
+        return keyword_;
+    }
+
+    void accept(ExpressionVisitor& visitor) override {
+        visitor.visitThisExpression(*this);
+    }
+private:
+    Token keyword_;
+};
 
 #endif //LOX_EXPRESSIONS_H

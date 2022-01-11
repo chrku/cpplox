@@ -29,11 +29,19 @@ public:
      */
     LoxFunction(FunctionExpression& function, std::shared_ptr<Environment> closure);
 
+    LoxFunction(std::vector<std::shared_ptr<Statement>>  statements_,
+                std::vector<Token>  params_,
+                std::shared_ptr<Environment> closure_);
+
+    std::shared_ptr<LoxFunction> bind(const std::shared_ptr<LoxInstance>& instance);
+
     LoxType call(Interpreter &interpreter, std::vector<LoxType> &arguments) override;
 
     int arity() override;
 
     ~LoxFunction() override = default;
+
+
 private:
     std::vector<std::shared_ptr<Statement>> statements_;
     std::vector<Token> params_;

@@ -56,6 +56,16 @@ TEST(LoxTests, ClassTest4) {
                   "");
 }
 
+TEST(LoxTests, ClassTest5) {
+    expectProgram("examples/class_5.lox", "The German chocolate cake is delicious!\n",
+                  "");
+}
+
+TEST(LoxTests, ClassTest6) {
+    expectProgram("examples/class_6.lox", "Thing instance\n",
+                  "");
+}
+
 TEST(LoxTests, ClockTest) {
     expectProgram("examples/clock.lox", "0.000000\n",
                   "");

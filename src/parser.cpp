@@ -411,6 +411,7 @@ std::unique_ptr<Expression> Parser::primary() {
     if (match({TokenType::FALSE})) { return std::make_unique<Literal>(false); }
     if (match({TokenType::TRUE})) { return std::make_unique<Literal>(true); }
     if (match({TokenType::NIL})) { return std::make_unique<Literal>(); }
+    if (match({TokenType::THIS})) { return std::make_unique<ThisExpression>(previous()); }
     if (match({TokenType::FUN})) { return handleFunctionExpression(); }
 
     if (match({TokenType::NUMBER, TokenType::STRING})) {

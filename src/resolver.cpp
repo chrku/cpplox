@@ -102,6 +102,10 @@ void Resolver::visitFunctionExpression(FunctionExpression& f) {
     currentFunction_ = enclosing;
 }
 
+void Resolver::visitThisExpression(ThisExpression& t) {
+    resolveLocal(&t, t.getKeyword());
+}
+
 void Resolver::visitExpressionStatement(ExpressionStatement& s) {
     resolve(*s.getExpression());
 }
@@ -172,10 +176,16 @@ void Resolver::visitReturn(Return& r) {
 void Resolver::visitClassDeclaration(ClassDeclaration& c) {
     declare(c.getName());
 
+    beginScope();
+    Token this_token(TokenType::THIS, "this", -1);
+    scopes_.back()[this_token] = true;
+
     for (const auto& method : c.getMethods()) {
         auto declaration = FunctionType::METHOD;
         resolveFunction(*method, declaration);
     }
+
+    endScope();
 
     define(c.getName());
 }
@@ -191,7 +201,7 @@ void Resolver::endScope() {
     const auto& cur_usage_set = usage_.back();
     for (const auto& pair : scopes_.back()) {
         const auto& name = pair.first;
-        if (!cur_usage_set.count(name)) {
+        if (name.getLexeme() != "this" && !cur_usage_set.count(name)) {
             context_->error(name, "Local variable not used.");
         }
     }
@@ -260,6 +270,7 @@ void Resolver::defineLocal(const Token& name) {
     auto location = index++;
     current_map[name] = location;
 }
+
 
 
 

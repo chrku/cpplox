@@ -9,7 +9,7 @@
 
 #include "loxclass.h"
 
-class LoxInstance {
+class LoxInstance : public std::enable_shared_from_this<LoxInstance> {
 public:
     explicit LoxInstance(std::shared_ptr<LoxClass> klass);
 

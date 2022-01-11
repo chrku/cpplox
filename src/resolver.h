@@ -57,6 +57,7 @@ public:
     void visitCall(Call &c) override;
     void visitGetExpression(GetExpression& g) override;
     void visitSetExpression(SetExpression& s) override;
+    void visitThisExpression(ThisExpression& t) override;
 
     void visitFunctionExpression(FunctionExpression &f) override;
     void visitExpressionStatement(ExpressionStatement &s) override;

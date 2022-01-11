@@ -21,7 +21,7 @@ LoxType LoxInstance::get(const Token& name) {
     }
 
     if (class_->getMethod(name)) {
-        return std::static_pointer_cast<Callable>(class_->getMethod(name));
+        return class_->getMethod(name)->bind(shared_from_this());
     }
 
     throw RuntimeError(name,
