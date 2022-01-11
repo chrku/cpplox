@@ -23,6 +23,11 @@ enum class FunctionType {
     METHOD
 };
 
+enum class ClassType {
+    NONE,
+    CLASS
+};
+
 /**
  * This class does the resolve pass,
  * which maps variable names to their locations
@@ -83,6 +88,7 @@ private:
     std::vector<std::unordered_map<Token, bool>> scopes_;
     std::vector<std::unordered_set<Token>> usage_;
     FunctionType currentFunction_ = FunctionType::NONE;
+    ClassType currentClass_ = ClassType::NONE;
 
     std::vector<std::unordered_map<Token, std::size_t>> localLocations_;
     std::unordered_map<Token, std::size_t> globalLocations_;

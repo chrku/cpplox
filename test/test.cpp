@@ -107,6 +107,11 @@ TEST(LoxTests, IfTest1) {
                   "");
 }
 
+TEST(LoxTests, InvalidThis) {
+    expectProgram("examples/invalidthis.lox", "",
+                  "[line 1] Error at 'this': Can't use 'this' outside of a class.\n");
+}
+
 TEST(LoxTests, LogicalOps) {
     expectProgram("examples/logicalops.lox", "hi\nyes\n",
                   "");

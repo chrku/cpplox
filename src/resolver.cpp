@@ -103,6 +103,11 @@ void Resolver::visitFunctionExpression(FunctionExpression& f) {
 }
 
 void Resolver::visitThisExpression(ThisExpression& t) {
+    if (currentClass_ == ClassType::NONE) {
+        context_->error(t.getKeyword(),
+                        "Can't use 'this' outside of a class.");
+        return;
+    }
     resolveLocal(&t, t.getKeyword());
 }
 
@@ -174,6 +179,9 @@ void Resolver::visitReturn(Return& r) {
 }
 
 void Resolver::visitClassDeclaration(ClassDeclaration& c) {
+    ClassType curType = currentClass_;
+    currentClass_ = ClassType::CLASS;
+
     declare(c.getName());
 
     beginScope();
@@ -186,8 +194,9 @@ void Resolver::visitClassDeclaration(ClassDeclaration& c) {
     }
 
     endScope();
-
     define(c.getName());
+
+    currentClass_ = curType;
 }
 
 void Resolver::beginScope() {
