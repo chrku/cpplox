@@ -71,6 +71,11 @@ TEST(LoxTests, ClockTest) {
                   "");
 }
 
+TEST(LoxTests, CtorTest1) {
+    expectProgram("examples/ctor_1.lox", "The south German chocolate cake is delicious!\n",
+                  "");
+}
+
 TEST(LoxTests, ClosureTest) {
     expectProgram("examples/closure_test.lox", "global\nglobal\nblock\n",
                   "");

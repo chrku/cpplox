@@ -292,7 +292,7 @@ void Interpreter::visitThisExpression(ThisExpression &t) {
 }
 
 void Interpreter::visitFunctionExpression(FunctionExpression& f) {
-    std::shared_ptr<LoxFunction> l = std::make_shared<LoxFunction>(f, getEnvironment());
+    std::shared_ptr<LoxFunction> l = std::make_shared<LoxFunction>(f, getEnvironment(), false);
     valueStack_.emplace_back(l);
 }
 
@@ -363,7 +363,7 @@ void Interpreter::visitBreakStatement(BreakStatement &b) {
 }
 
 void Interpreter::visitFunction(Function& f) {
-    std::shared_ptr<LoxFunction> function = std::make_shared<LoxFunction>(f, environment_);
+    std::shared_ptr<LoxFunction> function = std::make_shared<LoxFunction>(f, environment_, false);
     environment_->define(function);
 }
 
@@ -382,7 +382,12 @@ void Interpreter::visitClassDeclaration(ClassDeclaration& c) {
 
     std::unordered_map<Token, std::shared_ptr<LoxFunction>> methods;
     for (const std::shared_ptr<Function>& function : c.getMethods()) {
-        std::shared_ptr<LoxFunction> method = std::make_shared<LoxFunction>(*function, environment_);
+        std::shared_ptr<LoxFunction> method;
+        if (function->getName().getLexeme() != "init") {
+            method = std::make_shared<LoxFunction>(*function, environment_, false);
+        } else {
+            method = std::make_shared<LoxFunction>(*function, environment_, true);
+        }
         methods[function->getName()] = method;
     }
 

@@ -4,6 +4,7 @@
 
 #include "loxclass.h"
 #include "loxinstance.h"
+#include "loxfunction.h"
 
 #include <utility>
 
@@ -18,11 +19,17 @@ const std::string& LoxClass::getName() const {
 
 LoxType LoxClass::call(Interpreter& interpreter, std::vector<LoxType>& arguments) {
     std::shared_ptr<LoxInstance> new_instance = std::make_shared<LoxInstance>(shared_from_this());
+    auto initializer = getMethod(Token(TokenType::IDENTIFIER, "init", 0));
+    if (initializer) {
+        initializer->bind(new_instance)->call(interpreter, arguments);
+    }
     return new_instance;
 }
 
 int LoxClass::arity() {
-    return 0;
+    auto initializer = getMethod(Token(TokenType::IDENTIFIER, "init", 0));
+    if (initializer) { return initializer->arity(); }
+    else { return 0; }
 }
 
 std::shared_ptr<LoxFunction> LoxClass::getMethod(const Token& name) {

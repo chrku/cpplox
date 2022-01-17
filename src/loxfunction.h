@@ -20,18 +20,19 @@ public:
      * @param function Reference to normal function in AST
      * @param closure enclosing environment used for lookups
      */
-    LoxFunction(Function& function, std::shared_ptr<Environment> closure);
+    LoxFunction(Function& function, std::shared_ptr<Environment> closure, bool is_init);
 
     /**
      * Constructor used for anonymous functions
      * @param function Reference to anonymous function
      * @param closure enclosing environment used for lookups
      */
-    LoxFunction(FunctionExpression& function, std::shared_ptr<Environment> closure);
+    LoxFunction(FunctionExpression& function, std::shared_ptr<Environment> closure, bool is_init);
 
     LoxFunction(std::vector<std::shared_ptr<Statement>>  statements_,
                 std::vector<Token>  params_,
-                std::shared_ptr<Environment> closure_);
+                std::shared_ptr<Environment> closure_,
+                bool is_init);
 
     std::shared_ptr<LoxFunction> bind(const std::shared_ptr<LoxInstance>& instance);
 
@@ -46,6 +47,7 @@ private:
     std::vector<std::shared_ptr<Statement>> statements_;
     std::vector<Token> params_;
     std::shared_ptr<Environment> closure_;
+    bool isInit_;
 };
 
 

@@ -175,6 +175,9 @@ void Resolver::visitReturn(Return& r) {
     if (currentFunction_ == FunctionType::NONE) {
         context_->error(r.getKeyword(), "Can't return from top-level code.");
     }
+    if (r.getValue() != nullptr && currentFunction_ == FunctionType::INITIALIZER) {
+        context_->error(r.getKeyword(), "Can't return from initializer.");
+    }
     resolve(*r.getValue());
 }
 
@@ -190,6 +193,9 @@ void Resolver::visitClassDeclaration(ClassDeclaration& c) {
 
     for (const auto& method : c.getMethods()) {
         auto declaration = FunctionType::METHOD;
+        if (method->getName().getLexeme() == "init") {
+            declaration = FunctionType::INITIALIZER;
+        }
         resolveFunction(*method, declaration);
     }
 
