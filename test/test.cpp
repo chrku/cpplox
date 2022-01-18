@@ -107,6 +107,11 @@ TEST(LoxTests, HiTest) {
                   "");
 }
 
+TEST(LoxTests, InheritanceTest1) {
+    expectProgram("examples/inheritance_1.lox", "Fry until golden brown.\n",
+                  "");
+}
+
 TEST(LoxTests, IfTest1) {
     expectProgram("examples/if_1.lox", "2.000000\n4.000000\n",
                   "");

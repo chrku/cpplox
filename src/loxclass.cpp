@@ -43,5 +43,9 @@ std::shared_ptr<LoxFunction> LoxClass::getMethod(const Token& name) {
         return methods_.at(name);
     }
 
+    if (superclass_) {
+        return superclass_->getMethod(name);
+    }
+
     return {};
 }
