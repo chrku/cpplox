@@ -119,6 +119,13 @@ std::shared_ptr<Statement> Parser::functionDeclaration() {
 
 std::shared_ptr<Statement> Parser::classDeclaration() {
     auto name = consume(TokenType::IDENTIFIER, "Expect class name");
+
+    std::unique_ptr<VariableAccess> superclass;
+    if (match({TokenType::LESS})) {
+        consume(TokenType::IDENTIFIER, "Expect superclass name.");
+        superclass = std::make_unique<VariableAccess>(previous());
+    }
+
     consume(TokenType::LEFT_BRACE, "Expect '{' before class body");
 
     std::vector<std::shared_ptr<Function>> methods;
@@ -128,7 +135,7 @@ std::shared_ptr<Statement> Parser::classDeclaration() {
 
     consume(TokenType::RIGHT_BRACE, "Expect '}' after class body.");
 
-    return std::make_shared<ClassDeclaration>(name, std::move(methods));
+    return std::make_shared<ClassDeclaration>(name, std::move(methods), std::move(superclass));
 }
 
 std::vector<std::shared_ptr<Statement>> Parser::block() {

@@ -378,6 +378,15 @@ void Interpreter::visitReturn(Return& r) {
 }
 
 void Interpreter::visitClassDeclaration(ClassDeclaration& c) {
+    LoxType superclass;
+    if (c.getSuperclass()) {
+        superclass = evaluate(*c.getSuperclass());
+        if (!std::holds_alternative<std::shared_ptr<LoxClass>>(superclass)) {
+            throw RuntimeError(c.getSuperclass()->getToken(),
+                               "Superclass must be class");
+        }
+    }
+
     auto index = environment_->define();
 
     std::unordered_map<Token, std::shared_ptr<LoxFunction>> methods;
@@ -391,8 +400,14 @@ void Interpreter::visitClassDeclaration(ClassDeclaration& c) {
         methods[function->getName()] = method;
     }
 
-    std::shared_ptr<LoxClass> l = std::make_shared<LoxClass>(c.getName().getLexeme(), methods);
-    environment_->assign(index, l);
+    if (c.getSuperclass()) {
+        std::shared_ptr<LoxClass> l = std::make_shared<LoxClass>(c.getName().getLexeme(), methods,
+                                                                 std::get<std::shared_ptr<LoxClass>>(superclass));
+        environment_->assign(index, l);
+    } else {
+        std::shared_ptr<LoxClass> l = std::make_shared<LoxClass>(c.getName().getLexeme(), methods);
+        environment_->assign(index, l);
+    }
 }
 
 bool Interpreter::isTruthy(const LoxType& t) {

@@ -283,7 +283,12 @@ private:
 class ClassDeclaration : public Statement {
 public:
     ClassDeclaration(Token  name, std::vector<std::shared_ptr<Function>> methods)
-        : name_{std::move(name)}, methods_(std::move(methods))
+        : name_{std::move(name)}, methods_(std::move(methods)), superclass_(nullptr)
+    {}
+
+    ClassDeclaration(Token  name, std::vector<std::shared_ptr<Function>> methods,
+                     std::unique_ptr<VariableAccess> superclass)
+            : name_{std::move(name)}, methods_(std::move(methods)), superclass_(std::move(superclass))
     {}
 
     ~ClassDeclaration() override = default;
@@ -300,9 +305,14 @@ public:
         return methods_;
     }
 
+    [[nodiscard]] const std::unique_ptr<VariableAccess>& getSuperclass() const {
+        return superclass_;
+    }
+
 private:
     Token name_;
     std::vector<std::shared_ptr<Function>> methods_;
+    std::unique_ptr<VariableAccess> superclass_;
 };
 
 #endif //LOX_STATEMENTS_H

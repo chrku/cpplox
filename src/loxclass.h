@@ -15,7 +15,11 @@ class LoxFunction;
 class LoxClass : public Callable, public std::enable_shared_from_this<LoxClass> {
 public:
     LoxClass(std::string name,
-             std::unordered_map<Token, std::shared_ptr<LoxFunction>>);
+             std::unordered_map<Token, std::shared_ptr<LoxFunction>> methods);
+
+    LoxClass(std::string name,
+             std::unordered_map<Token, std::shared_ptr<LoxFunction>> methods,
+             std::shared_ptr<LoxClass> superclass);
 
     const std::string& getName() const;
 
@@ -30,6 +34,7 @@ public:
 private:
     std::string name_;
     std::unordered_map<Token, std::shared_ptr<LoxFunction>> methods_;
+    std::shared_ptr<LoxClass> superclass_;
 };
 
 

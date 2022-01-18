@@ -202,6 +202,14 @@ void Resolver::visitClassDeclaration(ClassDeclaration& c) {
     endScope();
     define(c.getName());
 
+    if (c.getSuperclass() && c.getName().getLexeme() == c.getSuperclass()->getToken().getLexeme()) {
+        context_->error(c.getSuperclass()->getToken(), "A class can't inherit from itself.");
+    }
+
+    if (c.getSuperclass()) {
+        resolve(*c.getSuperclass());
+    }
+
     currentClass_ = curType;
 }
 

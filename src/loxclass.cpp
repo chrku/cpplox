@@ -9,7 +9,13 @@
 #include <utility>
 
 LoxClass::LoxClass(std::string name, std::unordered_map<Token, std::shared_ptr<LoxFunction>> methods)
-    : name_{std::move(name)}, methods_(std::move(methods))
+    : name_{std::move(name)}, methods_(std::move(methods)), superclass_(nullptr)
+{
+}
+
+LoxClass::LoxClass(std::string name, std::unordered_map<Token, std::shared_ptr<LoxFunction>> methods,
+                   std::shared_ptr<LoxClass> superclass)
+        : name_{std::move(name)}, methods_(std::move(methods)), superclass_(std::move(superclass))
 {
 }
 
