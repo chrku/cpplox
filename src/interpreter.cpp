@@ -291,6 +291,20 @@ void Interpreter::visitThisExpression(ThisExpression &t) {
     valueStack_.emplace_back(lookUpVariable(&t));
 }
 
+void Interpreter::visitSuperExpression(SuperExpression& s) {
+    auto super = std::get<std::shared_ptr<LoxClass>>(lookUpVariable(&s));
+    auto super_distance = exprLocations_[&s].second;
+    auto object = environment_->getAt(0, super_distance - 1);
+    auto method = super->getMethod(s.getMethod());
+
+    if (!method) {
+        throw RuntimeError(s.getMethod(),
+                           "Undefined property '" + s.getMethod().getLexeme() + "'.");
+    }
+
+    valueStack_.emplace_back(method->bind(std::get<std::shared_ptr<LoxInstance>>(object)));
+}
+
 void Interpreter::visitFunctionExpression(FunctionExpression& f) {
     std::shared_ptr<LoxFunction> l = std::make_shared<LoxFunction>(f, getEnvironment(), false);
     valueStack_.emplace_back(l);
@@ -388,6 +402,14 @@ void Interpreter::visitClassDeclaration(ClassDeclaration& c) {
     }
 
     auto index = environment_->define();
+    std::shared_ptr<Environment> current = environment_;
+
+    if (c.getSuperclass()) {
+        std::shared_ptr<Environment> env = std::make_shared<Environment>();
+        env->setEnclosing(environment_);
+        env->define(superclass);
+        environment_ = env;
+    }
 
     std::unordered_map<Token, std::shared_ptr<LoxFunction>> methods;
     for (const std::shared_ptr<Function>& function : c.getMethods()) {
@@ -401,6 +423,7 @@ void Interpreter::visitClassDeclaration(ClassDeclaration& c) {
     }
 
     if (c.getSuperclass()) {
+        environment_ = current;
         std::shared_ptr<LoxClass> l = std::make_shared<LoxClass>(c.getName().getLexeme(), methods,
                                                                  std::get<std::shared_ptr<LoxClass>>(superclass));
         environment_->assign(index, l);

@@ -23,6 +23,7 @@ class FunctionExpression;
 class GetExpression;
 class SetExpression;
 class ThisExpression;
+class SuperExpression;
 
 class Statement;
 
@@ -44,6 +45,7 @@ public:
     virtual void visitGetExpression(GetExpression& g) = 0;
     virtual void visitSetExpression(SetExpression& s) = 0;
     virtual void visitThisExpression(ThisExpression& s) = 0;
+    virtual void visitSuperExpression(SuperExpression& s) = 0;
 
     virtual ~ExpressionVisitor() = default;
 };
@@ -397,7 +399,7 @@ private:
   */
 class ThisExpression : public Expression {
 public:
-    ThisExpression(Token keyword) : keyword_(std::move(keyword)) {}
+    explicit ThisExpression(Token keyword) : keyword_(std::move(keyword)) {}
 
     [[nodiscard]] const Token& getKeyword() const {
         return keyword_;
@@ -408,6 +410,27 @@ public:
     }
 private:
     Token keyword_;
+};
+
+class SuperExpression : public Expression {
+public:
+    SuperExpression(Token keyword, Token method)
+      : keyword_(std::move(keyword)), method_(std::move(method)) {}
+
+    [[nodiscard]] const Token &getKeyword() const {
+        return keyword_;
+    }
+
+    [[nodiscard]] const Token &getMethod() const {
+        return method_;
+    }
+
+    void accept(ExpressionVisitor& visitor) override {
+        visitor.visitSuperExpression(*this);
+    }
+private:
+    Token keyword_;
+    Token method_;
 };
 
 #endif //LOX_EXPRESSIONS_H

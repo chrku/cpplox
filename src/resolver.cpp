@@ -111,6 +111,10 @@ void Resolver::visitThisExpression(ThisExpression& t) {
     resolveLocal(&t, t.getKeyword());
 }
 
+void Resolver::visitSuperExpression(SuperExpression& s) {
+    resolveLocal(&s, s.getKeyword());
+}
+
 void Resolver::visitExpressionStatement(ExpressionStatement& s) {
     resolve(*s.getExpression());
 }
@@ -187,6 +191,20 @@ void Resolver::visitClassDeclaration(ClassDeclaration& c) {
 
     declare(c.getName());
 
+    if (c.getSuperclass() && c.getName().getLexeme() == c.getSuperclass()->getToken().getLexeme()) {
+        context_->error(c.getSuperclass()->getToken(), "A class can't inherit from itself.");
+    }
+
+    if (c.getSuperclass()) {
+        resolve(*c.getSuperclass());
+    }
+
+    if (c.getSuperclass()) {
+        beginScope();
+        Token super_token(TokenType::THIS, "super", -1);
+        scopes_.back()[super_token] = true;
+    }
+
     beginScope();
     Token this_token(TokenType::THIS, "this", -1);
     scopes_.back()[this_token] = true;
@@ -200,16 +218,12 @@ void Resolver::visitClassDeclaration(ClassDeclaration& c) {
     }
 
     endScope();
-    define(c.getName());
-
-    if (c.getSuperclass() && c.getName().getLexeme() == c.getSuperclass()->getToken().getLexeme()) {
-        context_->error(c.getSuperclass()->getToken(), "A class can't inherit from itself.");
-    }
 
     if (c.getSuperclass()) {
-        resolve(*c.getSuperclass());
+        endScope();
     }
 
+    define(c.getName());
     currentClass_ = curType;
 }
 
@@ -221,10 +235,10 @@ void Resolver::beginScope() {
 }
 
 void Resolver::endScope() {
-    const auto& cur_usage_set = usage_.back();
-    for (const auto& pair : scopes_.back()) {
-        const auto& name = pair.first;
-        if (name.getLexeme() != "this" && !cur_usage_set.count(name)) {
+    const auto &cur_usage_set = usage_.back();
+    for (const auto &pair: scopes_.back()) {
+        const auto &name = pair.first;
+        if (name.getLexeme() != "this" && name.getLexeme() != "super" && !cur_usage_set.count(name)) {
             context_->error(name, "Local variable not used.");
         }
     }

@@ -112,6 +112,12 @@ TEST(LoxTests, InheritanceTest1) {
                   "");
 }
 
+TEST(LoxTests, InheritanceTest2) {
+    expectProgram("examples/inheritance_2.lox",
+                  "Fry until golden brown.\nPipe full of custard and coat with chocolate.\n",
+                  "");
+}
+
 TEST(LoxTests, IfTest1) {
     expectProgram("examples/if_1.lox", "2.000000\n4.000000\n",
                   "");
