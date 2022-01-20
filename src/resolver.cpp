@@ -112,6 +112,13 @@ void Resolver::visitThisExpression(ThisExpression& t) {
 }
 
 void Resolver::visitSuperExpression(SuperExpression& s) {
+    if (currentClass_ == ClassType::NONE) {
+        context_->error(s.getKeyword(),
+                        "Can't use 'super' outside of a class.");
+    } else if (currentClass_ != ClassType::SUBCLASS) {
+        context_->error(s.getKeyword(),
+                        "Can't use 'super' in a class with no superclass.");
+    }
     resolveLocal(&s, s.getKeyword());
 }
 
@@ -196,6 +203,7 @@ void Resolver::visitClassDeclaration(ClassDeclaration& c) {
     }
 
     if (c.getSuperclass()) {
+        currentClass_ = ClassType::SUBCLASS;
         resolve(*c.getSuperclass());
     }
 
